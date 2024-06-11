@@ -18,8 +18,33 @@ app.use(cors({
 
 const { runSimulation } = require('./testlogic/testlogic');
 
-const totalBudget = 5000000;
-runSimulation(totalBudget);
+
+
+// Example usage:
+const countryOneProfile = {
+    budget: 5000000,
+    units: {
+      infantry: 10000,
+      navy: 1000,
+      airForce: 600,
+      technology: 300,
+      logistics: 400,
+      intelligence: 400,
+    },
+  };
+  
+  const countryTwoProfile = {
+    budget: 5000000,
+    units: {
+      infantry: 100000,
+      navy: 1300,
+      airForce: 600,
+      technology: 300,
+      logistics: 400,
+      intelligence: 400,
+    },
+  };
+runSimulation(countryOneProfile, countryTwoProfile);
 
     
 const server = http.createServer( app);
