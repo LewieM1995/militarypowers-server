@@ -69,72 +69,65 @@ const calculateMilitaryPower = (country, terrain) => {
 
   return (
     country.units.infantry * 1.5 * modifiers.infantry +
-    country.units.navy * 1.3 * modifiers.navy +
-    country.units.airForce * 1.4 * modifiers.airForce +
-    country.units.technology * 1.2 * modifiers.technology +
-    country.units.logistics * 1.1 * modifiers.logistics +
-    country.units.intelligence * 1.2 * modifiers.intelligence
-  );
-};
-
-const calculateTotalPower = (country) => {
-  return (
-    country.units.infantry +
-    country.units.navy +
-    country.units.airForce +
-    country.units.technology +
-    country.units.logistics +
-    country.units.intelligence
+    country.units.navy * 1.5 * modifiers.navy +
+    country.units.airForce * 1.5 * modifiers.airForce +
+    country.units.technology * 1.5 * modifiers.technology +
+    country.units.logistics * 1.5 * modifiers.logistics +
+    country.units.intelligence * 1.5 * modifiers.intelligence
   );
 };
 
 
-const calculateRemainingUnits = (units, unitsLost) => {
+const calculateRemainingUnits = (units, unitsLost, powerCoefficient) => {
   const remainingUnits = {};
   for (const unit in units) {
     if (units.hasOwnProperty(unit)) {
-      remainingUnits[unit] = Math.max(0, units[unit] - (unitsLost[unit] || 0));
+      remainingUnits[unit] = Math.floor(Math.max(0, units[unit] - unitsLost[unit]) * (1 - Math.abs(powerCoefficient)));
     }
   }
   return remainingUnits;
 };
+
+ const calculateUnitsLost = (initialUnits, remainingUnits) => {
+  const unitsLost = {};
+  for (const unit in initialUnits) {
+    if (initialUnits.hasOwnProperty(unit)) {
+      unitsLost[unit] = initialUnits[unit] - remainingUnits[unit];
+    }
+  }
+  return unitsLost;
+};
+
+const stalemateLossRate = 0.05;
+const applyStalemateLossRate= (units) => {
+  const lossUnits = {};
+  for (const unit in units){
+    if (units.hasOwnProperty(unit)){
+      lossUnits[unit] = Math.floor(units[unit] * stalemateLossRate)
+    }
+  }
+  return lossUnits;
+}
+
 // Function to simulate a war between two countries
 const simulateWar = (countryOne, countryTwo, terrain) => {
-  console.log("Country One", countryOne.units);
-  console.log("Country Two", countryTwo.units);
 
-  const countryOneTotalPower = calculateTotalPower(countryOne);
-  const countryTwoTotalPower = calculateTotalPower(countryTwo);
-
+  let countryOneUnitsLost;
+  let countryTwoUnitsLost;
+  
+  const countryOneTotalPower = calculateMilitaryPower(countryOne, terrain);
+  const countryTwoTotalPower = calculateMilitaryPower(countryTwo, terrain);
+  
   const powerDifference = countryOneTotalPower - countryTwoTotalPower;
+  const totalPower = countryOneTotalPower + countryTwoTotalPower;
+  const powerCoefficient = powerDifference / totalPower;
 
-  if (
-    Math.abs(powerDifference) <
-    0.05 * Math.max(countryOneTotalPower, countryTwoTotalPower)
-  ) {
-    return {
-      winner: "Stalemate",
-      loser: "Stalemate",
-      terrain,
-      countryOnePower: countryOneTotalPower,
-      countryTwoPower: countryTwoTotalPower,
-      countryOneDamage: null,
-      countryTwoDamage: null,
-      countryOneUnitsLost: null,
-      countryTwoUnitsLost: null,
-      countryOneRemainingUnits: null,
-      countryTwoRemainingUnits: null,
-    };
-  }
+  
+   
 
   // Check for division by zero
   const maxPower = Math.max(countryOneTotalPower, countryTwoTotalPower);
-  const damagePercentage =
-    maxPower !== 0 ? Math.abs(powerDifference) / maxPower : 0;
-
-  // Calculate military power using the units calculated
-  const countryOnePower = calculateMilitaryPower(countryOne, terrain);
-  const countryTwoPower = calculateMilitaryPower(countryTwo, terrain);
+  const damagePercentage = maxPower !== 0 ? Math.abs(powerCoefficient) / maxPower : 0;
 
   // Calculate damage inflicted on each country's units
   const countryOneDamage = {
@@ -155,32 +148,37 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
     intelligence: Math.floor(countryTwo.units.intelligence * damagePercentage),
   };
 
-  // Translate damage to units lost for both countries
-  const countryOneUnitsLost = countryTwoDamage;
-  const countryTwoUnitsLost = countryOneDamage;
-
   // Calculate remaining units for both countries after the war
-  const countryOneRemainingUnits = calculateRemainingUnits(countryOne.units, countryOneUnitsLost);
-  const countryTwoRemainingUnits = calculateRemainingUnits(countryTwo.units, countryTwoUnitsLost);
-
+  const countryOneRemainingUnits = calculateRemainingUnits(countryOne.units, countryTwoDamage, powerCoefficient);
+  const countryTwoRemainingUnits = calculateRemainingUnits(countryTwo.units, countryOneDamage, powerCoefficient);
+  
+  countryOneUnitsLost = calculateUnitsLost(countryOne.units, countryOneRemainingUnits);
+  countryTwoUnitsLost = calculateUnitsLost(countryTwo.units, countryTwoRemainingUnits);
+  
   // Simple war outcome logic
-  const winner = powerDifference > 0 ? "Country 1" : "Country 2";
-  const loser = winner === "Country 1" ? "Country 2" : "Country 1";
+  let winner = powerDifference > 0 ? "Country 1" : "Country 2";
+  let loser = winner === "Country 1" ? "Country 2" : "Country 1";
 
-  return {
-    winner,
-    loser,
-    terrain,
-    countryOnePower,
-    countryTwoPower,
-    countryOneDamage,
-    countryTwoDamage,
-    countryOneUnitsLost,
-    countryTwoUnitsLost,
-    countryOneRemainingUnits,
-    countryTwoRemainingUnits,
-  };
-};
+
+  if (Math.abs(powerDifference) < 0.05 * Math.max(countryOneTotalPower, countryTwoTotalPower)) {
+    countryOneUnitsLost = applyStalemateLossRate(countryOne.units);
+    countryTwoUnitsLost = applyStalemateLossRate(countryTwo.units);
+    winner = "Stalemate"
+    loser ="Stalemate"
+  }
+
+   return {
+      winner,
+      loser,
+      terrain,
+      countryOneTotalPower,
+      countryTwoTotalPower,
+      countryOneUnitsLost,
+      countryTwoUnitsLost,
+      countryOneRemainingUnits,
+      countryTwoRemainingUnits,
+    };
+ };
 
 // Function to run the entire simulation
 const runSimulation = (countryOneProfile, countryTwoProfile) => {

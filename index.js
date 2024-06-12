@@ -36,9 +36,9 @@ const countryOneProfile = {
   const countryTwoProfile = {
     budget: 5000000,
     units: {
-      infantry: 100000,
-      navy: 1300,
-      airForce: 600,
+      infantry: 12000,
+      navy: 1000,
+      airForce: 800,
       technology: 300,
       logistics: 400,
       intelligence: 400,
