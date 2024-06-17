@@ -3,41 +3,32 @@ const getRandomTerrain = () => {
   return terrains[Math.floor(Math.random() * terrains.length)];
 };
 
-const unitCostRating = {
-  infantry: 100,
-  navy: 600, 
-  airForce: 1000, 
-  technology: 1000, 
-  logistics: 500, 
-  intelligence: 500, 
-};
-
 // Function to calculate the military power of a country
 const calculateMilitaryPower = (country, terrain) => {
   const terrainModifiers = {
     desert: {
       infantry: 1.0,
       navy: 0.7,
-      airForce: 1.1,
+      airForce: 1.5,
       technology: 1.5,
-      logistics: 0.9,
-      intelligence: 1.0,
+      logistics: 1.6,
+      intelligence: 1.2,
     },
     forest: {
-      infantry: 1.1,
-      navy: 0.8,
-      airForce: 1.0,
+      infantry: 1.6,
+      navy: 0.7,
+      airForce: 0.8,
       technology: 1.5,
-      logistics: 0.9,
-      intelligence: 1.0,
+      logistics: 1.1,
+      intelligence: 1.7,
     },
     mountain: {
       infantry: 1.6,
       navy: 0.6,
       airForce: 1.4,
       technology: 1.5,
-      logistics: 0.8,
-      intelligence: 1.1,
+      logistics: 1.2,
+      intelligence: 1.4,
     },
     plains: {
       infantry: 1.2,
@@ -57,7 +48,7 @@ const calculateMilitaryPower = (country, terrain) => {
     },
     sea: {
       infantry: 0.8,
-      navy: 1.5,
+      navy: 1.9,
       airForce: 1.2,
       technology: 1.5,
       logistics: 1.0,
@@ -68,12 +59,12 @@ const calculateMilitaryPower = (country, terrain) => {
   const modifiers = terrainModifiers[terrain];
 
   return (
-    country.units.infantry * 1.5 * modifiers.infantry +
-    country.units.navy * 1.5 * modifiers.navy +
-    country.units.airForce * 1.5 * modifiers.airForce +
-    country.units.technology * 1.5 * modifiers.technology +
-    country.units.logistics * 1.5 * modifiers.logistics +
-    country.units.intelligence * 1.5 * modifiers.intelligence
+    country.units.infantry * 1 * modifiers.infantry +
+    country.units.navy * 1 * modifiers.navy +
+    country.units.airForce * 1 * modifiers.airForce +
+    country.units.technology * 1 * modifiers.technology +
+    country.units.logistics * 1 * modifiers.logistics +
+    country.units.intelligence * 2 * modifiers.intelligence
   );
 };
 
@@ -121,9 +112,6 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
   const powerDifference = countryOneTotalPower - countryTwoTotalPower;
   const totalPower = countryOneTotalPower + countryTwoTotalPower;
   const powerCoefficient = powerDifference / totalPower;
-
-  
-   
 
   // Check for division by zero
   const maxPower = Math.max(countryOneTotalPower, countryTwoTotalPower);

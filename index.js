@@ -1,53 +1,62 @@
-const express = require('express');
-const cors = require('cors');
-const http = require('http');
-require('dotenv').config();
-
+const express = require("express");
+const cors = require("cors");
+const http = require("http");
+require("dotenv").config();
+const bodyParser = require("body-parser");
+const userRoutes = require("./routes/routes");
 
 // App
 const app = express();
 app.use(express.json());
 
 // Middleware
-app.options('*', cors());
-app.use(cors({
-    origin: ['https://main.d2ua1ewdznhv26.amplifyapp.com', 'https://main.d2m80lfwl4zikf.amplifyapp.com', 'http://localhost:3000', 'http://localhost:4000'],
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.options("*", cors());
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://localhost:4000"],
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-const { runSimulation } = require('./testlogic/testlogic');
+app.use(bodyParser.json());
 
+app.use("/api", userRoutes);
 
+const { runSimulation } = require("./testlogic/testlogic");
 
 // Example usage:
 const countryOneProfile = {
-    budget: 5000000,
-    units: {
-      infantry: 10000,
-      navy: 1000,
-      airForce: 600,
-      technology: 300,
-      logistics: 400,
-      intelligence: 400,
-    },
-  };
-  
-  const countryTwoProfile = {
-    budget: 5000000,
-    units: {
-      infantry: 12000,
-      navy: 1000,
-      airForce: 800,
-      technology: 300,
-      logistics: 400,
-      intelligence: 400,
-    },
-  };
+  budget: 200000,
+  units: {
+    infantry: 50,
+    navy: 5,
+    airForce: 5,
+    technology: 2,
+    logistics: 2,
+    intelligence: 2,
+  },
+  profileStats: {
+    level: 0,
+    xp: 0,
+    nextLevelXp: 500,
+  },
+};
+
+const countryTwoProfile = {
+  budget: 200000,
+  units: {
+    infantry: 56,
+    navy: 5,
+    airForce: 5,
+    technology: 2,
+    logistics: 2,
+    intelligence: 100,
+  },
+};
 runSimulation(countryOneProfile, countryTwoProfile);
 
-    
-const server = http.createServer( app);
+const server = http.createServer(app);
 //porting
 const port = process.env.PORT || 4000;
 //listener
