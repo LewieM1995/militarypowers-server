@@ -21,11 +21,11 @@ const initialProfile = {
     {email: 'tester1@gmail.com', password: 'pass', profile: initialProfile}
    ]; 
 
-   console.log('users', users)
+   //console.log('users', users)
   
   const checkUser = (req, res) => {
     const { email, password } = req.body;
-    console.log('email', email);
+    //console.log('email', email);
     const user = users.find(u => u.email === email && u.password === password);
   
     if (user) {
@@ -44,7 +44,7 @@ const initialProfile = {
         profile: initialProfile,
       };
       users.push(newUser);
-      console.log('new user email', email)
+      //console.log('new user email', email)
       res.json({ success: true });
     } catch (error) {
       res.json({ success: false, error: error.message });

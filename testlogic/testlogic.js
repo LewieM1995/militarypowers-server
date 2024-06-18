@@ -16,7 +16,7 @@ const calculateMilitaryPower = (country, terrain) => {
     forest: {
       infantry: 1.6,
       navy: 0.7,
-      airForce: 0.8,
+      airForce: 1,
       technology: 1.5,
       logistics: 1.1,
       intelligence: 1.7,
@@ -48,7 +48,7 @@ const calculateMilitaryPower = (country, terrain) => {
     sea: {
       infantry: 0.8,
       navy: 1.9,
-      airForce: 1.2,
+      airForce: 1.7,
       technology: 1.5,
       logistics: 1.0,
       intelligence: 2,
@@ -117,7 +117,8 @@ const updateDOMWithResults = (
   countryOneUnitsLost,
   countryTwoUnitsLost,
   countryOneRemainingUnits,
-  countryTwoRemainingUnits
+  countryTwoRemainingUnits,
+  winnerStats
 ) => {
   const winnerElement = document.getElementById("winner");
   winnerElement.textContent = winner;
@@ -137,6 +138,8 @@ const updateDOMWithResults = (
   leftElement.textContent = JSON.stringify(countryOneRemainingUnits, null, 2);
   const leftTElement = document.getElementById("countryTwoRemainingUnits");
   leftTElement.textContent = JSON.stringify(countryTwoRemainingUnits, null, 2);
+  const winnerRewardsElement = document.getElementById("winnerStats");
+  winnerRewardsElement.textContent = JSON.stringify(winnerStats, null, 2);
 };
 
 const rewardWinner = (level, isWinner, enemyLevel) => {
@@ -203,7 +206,7 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
 
   const totalPower = countryOneTotalPower + countryTwoTotalPower;
   const powerDifference = Math.abs(countryOneTotalPower - countryTwoTotalPower);
-  const stalemateThreshold = 0.08;
+  const stalemateThreshold = 0.02;
 
   if (powerDifference < stalemateThreshold * totalPower) {
     const countryOneUnitsLost = applyStalemateLossRate(countryOne.units);
@@ -266,13 +269,13 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
     const budgetIncrease = calculateBudgetIncrease(
       winnerProfile.profileStats.level,
       loserProfile.profileStats.level,
-      10000
+      2500
     );
 
     winnerStats = { xpGain, budgetIncrease };
   }
 
-  /*updateDOMWithResults(
+  /* updateDOMWithResults(
     winner,
     loser,
     terrain,
@@ -281,8 +284,9 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
     countryOneUnitsLost,
     countryTwoUnitsLost,
     countryOneRemainingUnits,
-    countryTwoRemainingUnits
-  );*/
+    countryTwoRemainingUnits,
+    winnerStats
+  ); */
 
   return {
     winner,
@@ -298,12 +302,100 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
   };
 };
 
+const updateProfileBudget = (profile, budgetIncrease) => {
+  profile.budget += budgetIncrease;
+  return profile;
+};
+
+const updateProfileXpAndLevel = (profile, xpGain) => {
+  const { level, xp, nextLevelXp } = profile.profileStats;
+  let updatedXp = xp + xpGain;
+  let updatedLevel = level;
+  let updatedNextLevelXp = nextLevelXp;
+
+  while (updatedXp >= updatedNextLevelXp) {
+    updatedXp -= updatedNextLevelXp;
+    updatedLevel += 1;
+    updatedNextLevelXp *= 1.5; // Assuming the XP required for the next level doubles
+  }
+
+  const updatedProfileStats = {
+    ...profile.profileStats,
+    level: updatedLevel,
+    xp: updatedXp,
+    nextLevelXp: updatedNextLevelXp,
+  };
+
+  return {
+    ...profile,
+    profileStats: updatedProfileStats,
+  };
+};
+
 // Function to run the entire simulation
 const runSimulation = (countryOneProfile, countryTwoProfile) => {
   const terrain = getRandomTerrain();
   const warResult = simulateWar(countryOneProfile, countryTwoProfile, terrain);
-  console.log("War Result:", warResult);
+
+  let updatedCountryOneProfile = countryOneProfile;
+  let updatedCountryTwoProfile = countryTwoProfile;
+
+  if (warResult.winner !== "Stalemate") {
+    const winnerProfile = warResult.winner === "Country 1" ? countryOneProfile : countryTwoProfile;
+    const loserProfile = warResult.winner === "Country 1" ? countryTwoProfile : countryOneProfile;
+
+    console.log("Before Match Winner Profile:", winnerProfile);
+    console.log("Before Match Loser Profile:", loserProfile);
+
+    const updatedWinnerProfile = updateProfileXpAndLevel(winnerProfile, warResult.winnerStats.xpGain);
+    const updatedWinnerProfileWithBudget = updateProfileBudget(updatedWinnerProfile, warResult.winnerStats.budgetIncrease);
+
+    const winnerRemainingUnits = warResult.winner === "Country 1" ? warResult.countryOneRemainingUnits : warResult.countryTwoRemainingUnits;
+    const loserRemainingUnits = warResult.winner === "Country 1" ? warResult.countryTwoRemainingUnits : warResult.countryOneRemainingUnits;
+
+    updatedWinnerProfileWithBudget.units = winnerRemainingUnits;
+
+    const updatedLoserProfile = { ...loserProfile, units: loserRemainingUnits };
+
+    if (warResult.winner === "Country 1") {
+      updatedCountryOneProfile = updatedWinnerProfileWithBudget;
+      updatedCountryTwoProfile = updatedLoserProfile;
+    } else {
+      updatedCountryOneProfile = updatedLoserProfile;
+      updatedCountryTwoProfile = updatedWinnerProfileWithBudget;
+    }
+
+    console.log("Winner Rewards:", warResult.winnerStats);
+    console.log("After Match Winner Profile:", updatedWinnerProfileWithBudget);
+    console.log("After Match Loser Profile:", updatedLoserProfile);
+
+    /*
+    const matchResultHtml = `
+      <div>
+        <h3>Match Result</h3>
+        <p>Winner: ${warResult.winner}</p>
+        <p>Loser: ${warResult.loser}</p>
+        <p>Terrain: ${warResult.terrain}</p>
+        <p>Power (1): ${warResult.countryOneTotalPower}</p>
+        <p>Power (2): ${warResult.countryTwoTotalPower}</p>
+        <p>Lost Units (1): ${JSON.stringify(warResult.countryOneUnitsLost)}</p>
+        <p>Lost Units (2): ${JSON.stringify(warResult.countryTwoUnitsLost)}</p>
+        <p>Remaining (1): ${JSON.stringify(warResult.countryOneRemainingUnits)}</p>
+        <p>Remaining (2): ${JSON.stringify(warResult.countryTwoRemainingUnits)}</p>
+        <p>Winner Rewards: ${JSON.stringify(warResult.winnerStats)}</p>
+        <p>Updated Winner Profile: ${JSON.stringify(updatedWinnerProfileWithBudget)}</p>
+        <p>Updated Loser Profile: ${JSON.stringify(updatedLoserProfile)}</p>
+      </div>
+    `; 
+
+    // Append the match result HTML to the matchResults div
+    const matchResultsDiv = document.getElementById('matchResults');
+    matchResultsDiv.insertAdjacentHTML('beforeend', matchResultHtml); */
+  }
+
+  return { updatedCountryOneProfile, updatedCountryTwoProfile };
 };
+
 
 module.exports = {
   calculateMilitaryPower,

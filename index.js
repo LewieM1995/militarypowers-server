@@ -27,14 +27,14 @@ const { runSimulation } = require("./testlogic/testlogic");
 
 // Example usage:
 const countryOneProfile = {
-  budget: 200000,
+  budget: 100000,
   units: {
-    infantry: 50,
+    infantry: 100,
     navy: 5,
-    airForce: 5,
-    technology: 2,
+    airForce: 90,
+    technology: 10,
     logistics: 2,
-    intelligence: 2,
+    intelligence: 10,
   },
   profileStats: {
     level: 1,
@@ -44,22 +44,34 @@ const countryOneProfile = {
 };
 
 const countryTwoProfile = {
-  budget: 200000,
+  budget: 100000,
   units: {
-    infantry: 56,
+    infantry: 105,
     navy: 5,
-    airForce: 5,
-    technology: 2,
+    airForce: 95,
+    technology: 10,
     logistics: 2,
-    intelligence: 100,
+    intelligence: 10,
   },
   profileStats: {
-    level: 2,
+    level: 1,
     xp: 0,
     nextLevelXp: 500,
   },
 };
-runSimulation(countryOneProfile, countryTwoProfile);
+
+
+let currentCountryOneProfile = countryOneProfile;
+let currentCountryTwoProfile = countryTwoProfile;
+
+/* for (let i = 1; i < 5; i++) {
+  const { updatedCountryOneProfile, updatedCountryTwoProfile } = runSimulation(currentCountryOneProfile, currentCountryTwoProfile);
+
+  currentCountryOneProfile = updatedCountryOneProfile;
+  currentCountryTwoProfile = updatedCountryTwoProfile;
+
+  console.log(`After Simulation ${1 + i}:`);
+} */
 
 const server = http.createServer(app);
 //porting
