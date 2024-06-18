@@ -37,7 +37,7 @@ const countryOneProfile = {
     intelligence: 2,
   },
   profileStats: {
-    level: 0,
+    level: 1,
     xp: 0,
     nextLevelXp: 500,
   },
@@ -52,6 +52,11 @@ const countryTwoProfile = {
     technology: 2,
     logistics: 2,
     intelligence: 100,
+  },
+  profileStats: {
+    level: 2,
+    xp: 0,
+    nextLevelXp: 500,
   },
 };
 runSimulation(countryOneProfile, countryTwoProfile);
