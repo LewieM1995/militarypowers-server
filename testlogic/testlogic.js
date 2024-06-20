@@ -91,7 +91,6 @@ const calculateUnitsLost = (initialUnits, remainingUnits) => {
   return unitsLost;
 };
 
-
 const applyStalemateLossRate = (units) => {
   const stalemateLossRate = 0.05;
   const lossUnits = {};
@@ -281,7 +280,59 @@ const updateFirstwin= (winnerStats, isWinner) => {
   return winnerStats;
 };
 
-// Function to run the entire simulation
+const checkAndAwardAchievements = (playerProfile, enemyLevel) => {
+  if (!Array.isArray(playerProfile.profileStats.achievements)) {
+    playerProfile.profileStats.achievements = [];
+  }
+
+  achievementCriteria.forEach((achievement) => {
+    if (
+      achievement.checkCriteria(playerProfile, enemyLevel) &&
+      !playerProfile.profileStats.achievements.some((ach) => ach.id === achievement.id)
+    ) {
+      playerProfile.profileStats.achievements.push({
+        id: achievement.id,
+        name: achievement.name,
+        description: achievement.description,
+        icon: achievement.icon,
+      });
+      console.log(`${playerProfile.name} earned the "${achievement.name}" achievement!`);
+    }
+  });
+};
+
+const achievementCriteria = [
+  {
+    id: 1,
+    name: 'First Victory',
+    description: 'Win your first battle',
+    checkCriteria: (profile) => profile.profileStats.firstVictory,
+    icon: null
+  },
+  {
+    id: 2,
+    name: 'Unstoppable',
+    description: 'Win 5 battles in a row',
+    checkCriteria: (profile) => profile.profileStats.consecutiveWins >= 5,
+    icon: null
+  },
+  {
+    id: 3,
+    name: 'Master Strategist',
+    description: 'Reach level 10',
+    checkCriteria: (profile) => profile.profileStats.level >= 10,
+    icon: null
+  },
+  {
+    id: 4,
+    name: 'Legendary Warrior',
+    description: 'Defeat a level 10 opponent',
+    checkCriteria: (profile, enemyLevel) => profile.profileStats.highestEnemyLevelDefeated >= 10,
+    icon: null
+  },
+];
+
+
 const runSimulation = (countryOneProfile, countryTwoProfile) => {
   const terrain = getRandomTerrain();
   const warResult = simulateWar(countryOneProfile, countryTwoProfile, terrain);
@@ -312,11 +363,9 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     console.log("Updated Country 2 profile:", updatedCountryTwoProfile);
 
   } else {
-    const winner = warResult.isCountryOneWinner ? "Country 1" : "Country 2";
-    const loser = warResult.isCountryTwoWinner ? "Country 1" : "Country 2";
 
-    const winnerProfile = winner === "Country 1" ? countryOneProfile : countryTwoProfile;
-    const loserProfile = winner === "Country 1" ? countryTwoProfile : countryOneProfile;
+    const winnerProfile = warResult.isCountryOneWinner ? countryOneProfile : countryTwoProfile;
+    const loserProfile = warResult.isCountryOneWinner ? countryTwoProfile : countryOneProfile;
 
     const xpGain = rewardWinner(winnerProfile.profileStats.level, true, loserProfile.profileStats.level);
     const budgetIncrease = calculateBudgetIncrease(winnerProfile.profileStats.level, loserProfile.profileStats.level, 2500);
@@ -333,18 +382,18 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
       ...winnerProfile,
       profileStats: updatedProfileStats
     };
- 
+
     const updatedWinnerProfileWithXp = updateProfileXpAndLevel(updatedWinnerProfile, xpGain);
     const updatedWinnerProfileWithBudget = updateProfileBudget(updatedWinnerProfileWithXp, budgetIncrease);
 
-    const winnerRemainingUnits = winner === "Country 1" ? warResult.countryOneRemainingUnits : warResult.countryTwoRemainingUnits;
-    const loserRemainingUnits = winner === "Country 1" ? warResult.countryTwoRemainingUnits : warResult.countryOneRemainingUnits;
+    const winnerRemainingUnits = warResult.isCountryOneWinner ? warResult.countryOneRemainingUnits : warResult.countryTwoRemainingUnits;
+    const loserRemainingUnits = warResult.isCountryOneWinner ? warResult.countryTwoRemainingUnits : warResult.countryOneRemainingUnits;
 
     updatedWinnerProfileWithBudget.units = winnerRemainingUnits;
 
     const updatedLoserProfile = { ...loserProfile, units: loserRemainingUnits };
 
-    if (winner === "Country 1") {
+    if (warResult.isCountryOneWinner) {
       updatedCountryOneProfile = updatedWinnerProfileWithBudget;
       updatedCountryTwoProfile = updatedLoserProfile;
     } else {
@@ -354,12 +403,17 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
 
     console.log('Country One Power', warResult.countryOneTotalPower);
     console.log('Country Two Power', warResult.countryTwoTotalPower);
-    console.log(`Winner: ${winner}`);
-    console.log(`Loser: ${loser}`);
+    console.log(`Winner: ${warResult.isCountryOneWinner ? 'Country 1' : 'Country 2'}`);
+    console.log(`Loser: ${warResult.isCountryOneWinner ? 'Country 2' : 'Country 1'}`);
     console.log("Winner Rewards:", { xpGain, budgetIncrease, updatedProfileStats });
     console.log("After Match Winner Profile:", updatedWinnerProfileWithBudget);
     console.log("After Match Loser Profile:", updatedLoserProfile);
   }
+
+  checkAndAwardAchievements(updatedCountryOneProfile, updatedCountryTwoProfile.profileStats.level);
+  checkAndAwardAchievements(updatedCountryTwoProfile, updatedCountryOneProfile.profileStats.level);
+
+  console.log('Achievement', updatedCountryOneProfile.profileStats.achievements)
 
   return { updatedCountryOneProfile, updatedCountryTwoProfile };
 };

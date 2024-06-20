@@ -37,7 +37,7 @@ const countryOneProfile = {
     intelligence: 10,
   },
   profileStats: {
-    level: 1,
+    level: 10,
     xp: 0,
     nextLevelXp: 500,
     achievements: [],
@@ -59,7 +59,7 @@ const countryTwoProfile = {
     intelligence: 10,
   },
   profileStats: {
-    level: 1,
+    level: 10,
     xp: 0,
     nextLevelXp: 500,
     achievements: [],
