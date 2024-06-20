@@ -29,9 +29,9 @@ const { runSimulation } = require("./testlogic/testlogic");
 const countryOneProfile = {
   budget: 100000,
   units: {
-    infantry: 1000,
+    infantry: 120,
     navy: 5,
-    airForce: 90,
+    airForce: 110,
     technology: 10,
     logistics: 2,
     intelligence: 10,
@@ -40,6 +40,11 @@ const countryOneProfile = {
     level: 1,
     xp: 0,
     nextLevelXp: 500,
+    achievements: [],
+    totalBattles: 0, 
+    consecutiveWins: 0, 
+    highestEnemyLevelDefeated: 0, 
+    firstVictory: false,  
   },
 };
 
@@ -57,6 +62,11 @@ const countryTwoProfile = {
     level: 1,
     xp: 0,
     nextLevelXp: 500,
+    achievements: [],
+    totalBattles: 0, 
+    consecutiveWins: 0, 
+    highestEnemyLevelDefeated: 0, 
+    firstVictory: false, 
   },
 };
 

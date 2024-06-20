@@ -91,8 +91,9 @@ const calculateUnitsLost = (initialUnits, remainingUnits) => {
   return unitsLost;
 };
 
-const stalemateLossRate = 0.05;
+
 const applyStalemateLossRate = (units) => {
+  const stalemateLossRate = 0.05;
   const lossUnits = {};
   for (const unit in units) {
     if (units.hasOwnProperty(unit)) {
@@ -203,7 +204,7 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
 
   const totalPower = countryOneTotalPower + countryTwoTotalPower;
   const powerDifference = Math.abs(countryOneTotalPower - countryTwoTotalPower);
-  const stalemateThreshold = 0.02;
+  const stalemateThreshold = 0.015;
 
   const isStalemate = powerDifference < stalemateThreshold * totalPower;
 
@@ -250,6 +251,36 @@ const updateProfileXpAndLevel = (profile, xpGain) => {
   };
 };
 
+const updateBattleStats = (winnerStats, isWinner) => {
+  if (isWinner){
+    return winnerStats + 1
+  }
+  return winnerStats;
+};
+
+const updateConsecutiveWins = (winnerStats, isWinner) => {
+  if (isWinner){
+    return winnerStats + 1;
+  } else {
+    winnerStats = 0;
+  }
+  return winnerStats;
+};
+
+const updateHighestEnemyLevelDefeated = (winnerStats, enemyLevel, isWinner) => {
+  if (isWinner){
+    winnerStats = enemyLevel;
+  }
+  return winnerStats;
+};
+
+const updateFirstwin= (winnerStats, isWinner) => {
+  if (isWinner){
+    winnerStats = true;
+  }
+  return winnerStats;
+};
+
 // Function to run the entire simulation
 const runSimulation = (countryOneProfile, countryTwoProfile) => {
   const terrain = getRandomTerrain();
@@ -262,14 +293,13 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     const countryOneUnitsLost = applyStalemateLossRate(countryOneProfile.units);
     const countryTwoUnitsLost = applyStalemateLossRate(countryTwoProfile.units);
 
-    const countryOneRemainingUnits = calculateRemainingUnits(countryOneProfile.units, stalemateLossRate, false);
-    const countryTwoRemainingUnits = calculateRemainingUnits(countryTwoProfile.units, stalemateLossRate, false);
+    const countryOneRemainingUnits = calculateRemainingUnits(countryOneProfile.units, countryOneUnitsLost, false);
+    const countryTwoRemainingUnits = calculateRemainingUnits(countryTwoProfile.units, countryTwoUnitsLost, false);
 
     updatedCountryOneProfile = {
       ...countryOneProfile,
       units: countryOneRemainingUnits,
     };
-
     updatedCountryTwoProfile = {
       ...countryTwoProfile,
       units: countryTwoRemainingUnits,
@@ -291,10 +321,21 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     const xpGain = rewardWinner(winnerProfile.profileStats.level, true, loserProfile.profileStats.level);
     const budgetIncrease = calculateBudgetIncrease(winnerProfile.profileStats.level, loserProfile.profileStats.level, 2500);
 
-    const winnerStats = { xpGain, budgetIncrease };
+    const updatedProfileStats = {
+      ...winnerProfile.profileStats,
+      totalBattles: updateBattleStats(winnerProfile.profileStats.totalBattles, true),
+      consecutiveWins: updateConsecutiveWins(winnerProfile.profileStats.consecutiveWins, true),
+      highestEnemyLevelDefeated: updateHighestEnemyLevelDefeated(winnerProfile.profileStats.highestEnemyLevelDefeated, loserProfile.profileStats.level, true),
+      firstVictory: updateFirstwin(winnerProfile.profileStats.firstvictory, true)
+    };
 
-    const updatedWinnerProfile = updateProfileXpAndLevel(winnerProfile, xpGain);
-    const updatedWinnerProfileWithBudget = updateProfileBudget(updatedWinnerProfile, budgetIncrease);
+    let updatedWinnerProfile = {
+      ...winnerProfile,
+      profileStats: updatedProfileStats
+    };
+ 
+    const updatedWinnerProfileWithXp = updateProfileXpAndLevel(updatedWinnerProfile, xpGain);
+    const updatedWinnerProfileWithBudget = updateProfileBudget(updatedWinnerProfileWithXp, budgetIncrease);
 
     const winnerRemainingUnits = winner === "Country 1" ? warResult.countryOneRemainingUnits : warResult.countryTwoRemainingUnits;
     const loserRemainingUnits = winner === "Country 1" ? warResult.countryTwoRemainingUnits : warResult.countryOneRemainingUnits;
@@ -315,7 +356,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     console.log('Country Two Power', warResult.countryTwoTotalPower);
     console.log(`Winner: ${winner}`);
     console.log(`Loser: ${loser}`);
-    console.log("Winner Rewards:", winnerStats);
+    console.log("Winner Rewards:", { xpGain, budgetIncrease, updatedProfileStats });
     console.log("After Match Winner Profile:", updatedWinnerProfileWithBudget);
     console.log("After Match Loser Profile:", updatedLoserProfile);
   }
