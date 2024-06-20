@@ -170,9 +170,6 @@ const calculateBudgetIncrease = (winnerLevel, enemyLevel, initValue) => {
 };
 
 const simulateWar = (countryOne, countryTwo, terrain) => {
-  let countryOneUnitsLost;
-  let countryTwoUnitsLost;
-
   const countryOneTotalPower = calculateMilitaryPower(countryOne, terrain);
   const countryTwoTotalPower = calculateMilitaryPower(countryTwo, terrain);
 
@@ -195,11 +192,11 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
     isCountryTwoWinner
   );
 
-  countryOneUnitsLost = calculateUnitsLost(
+  const countryOneUnitsLost = calculateUnitsLost(
     countryOne.units,
     countryOneRemainingUnits
   );
-  countryTwoUnitsLost = calculateUnitsLost(
+  const countryTwoUnitsLost = calculateUnitsLost(
     countryTwo.units,
     countryTwoRemainingUnits
   );
@@ -208,97 +205,18 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
   const powerDifference = Math.abs(countryOneTotalPower - countryTwoTotalPower);
   const stalemateThreshold = 0.02;
 
-  if (powerDifference < stalemateThreshold * totalPower) {
-    const countryOneUnitsLost = applyStalemateLossRate(countryOne.units);
-    const countryTwoUnitsLost = applyStalemateLossRate(countryTwo.units);
-
-    updateDOMWithResults(
-      "Stalemate",
-      "Stalemate",
-      terrain,
-      countryOneTotalPower,
-      countryTwoTotalPower,
-      countryOneUnitsLost,
-      countryTwoUnitsLost,
-      calculateRemainingUnits(countryOne.units, stalemateLossRate),
-      calculateRemainingUnits(countryTwo.units, stalemateLossRate)
-    );
-
-    return {
-      winner: "Stalemate",
-      loser: "Stalemate",
-      terrain,
-      countryOneTotalPower,
-      countryTwoTotalPower,
-      countryOneUnitsLost,
-      countryTwoUnitsLost,
-      countryOneRemainingUnits: calculateRemainingUnits(
-        countryOne.units,
-        stalemateLossRate
-      ),
-      countryTwoRemainingUnits: calculateRemainingUnits(
-        countryTwo.units,
-        stalemateLossRate
-      ),
-    };
-  }
-
-  let winner = isCountryOneWinner
-    ? "Country 1"
-    : isCountryTwoWinner
-    ? "Country 2"
-    : "Stalemate";
-  let loser = isCountryOneWinner
-    ? "Country 2"
-    : isCountryTwoWinner
-    ? "Country 1"
-    : "Stalemate";
-
-  if (winner !== "Stalemate") {
-    const winnerProfile = winner === "Country 1" ? countryOne : countryTwo;
-    const loserProfile = winner === "Country 1" ? countryTwo : countryOne;
-
-    // calc xp reward func
-    const xpGain = rewardWinner(
-      winnerProfile.profileStats.level,
-      true,
-      loserProfile.profileStats.level
-    );
-
-    // calc budget func
-    const budgetIncrease = calculateBudgetIncrease(
-      winnerProfile.profileStats.level,
-      loserProfile.profileStats.level,
-      2500
-    );
-
-    winnerStats = { xpGain, budgetIncrease };
-  }
-
-  /* updateDOMWithResults(
-    winner,
-    loser,
-    terrain,
-    countryOneTotalPower,
-    countryTwoTotalPower,
-    countryOneUnitsLost,
-    countryTwoUnitsLost,
-    countryOneRemainingUnits,
-    countryTwoRemainingUnits,
-    winnerStats
-  ); */
+  const isStalemate = powerDifference < stalemateThreshold * totalPower;
 
   return {
-    winner,
-    loser,
-    terrain,
+    isStalemate,
     countryOneTotalPower,
     countryTwoTotalPower,
     countryOneUnitsLost,
     countryTwoUnitsLost,
     countryOneRemainingUnits,
     countryTwoRemainingUnits,
-    winnerStats
+    isCountryOneWinner,
+    isCountryTwoWinner,
   };
 };
 
@@ -340,24 +258,52 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
   let updatedCountryOneProfile = countryOneProfile;
   let updatedCountryTwoProfile = countryTwoProfile;
 
-  if (warResult.winner !== "Stalemate") {
-    const winnerProfile = warResult.winner === "Country 1" ? countryOneProfile : countryTwoProfile;
-    const loserProfile = warResult.winner === "Country 1" ? countryTwoProfile : countryOneProfile;
+  if (warResult.isStalemate) {
+    const countryOneUnitsLost = applyStalemateLossRate(countryOneProfile.units);
+    const countryTwoUnitsLost = applyStalemateLossRate(countryTwoProfile.units);
 
-    console.log("Before Match Winner Profile:", winnerProfile);
-    console.log("Before Match Loser Profile:", loserProfile);
+    const countryOneRemainingUnits = calculateRemainingUnits(countryOneProfile.units, stalemateLossRate, false);
+    const countryTwoRemainingUnits = calculateRemainingUnits(countryTwoProfile.units, stalemateLossRate, false);
 
-    const updatedWinnerProfile = updateProfileXpAndLevel(winnerProfile, warResult.winnerStats.xpGain);
-    const updatedWinnerProfileWithBudget = updateProfileBudget(updatedWinnerProfile, warResult.winnerStats.budgetIncrease);
+    updatedCountryOneProfile = {
+      ...countryOneProfile,
+      units: countryOneRemainingUnits,
+    };
 
-    const winnerRemainingUnits = warResult.winner === "Country 1" ? warResult.countryOneRemainingUnits : warResult.countryTwoRemainingUnits;
-    const loserRemainingUnits = warResult.winner === "Country 1" ? warResult.countryTwoRemainingUnits : warResult.countryOneRemainingUnits;
+    updatedCountryTwoProfile = {
+      ...countryTwoProfile,
+      units: countryTwoRemainingUnits,
+    };
+
+    console.log("Stalemate");
+    console.log("Country 1 units lost:", countryOneUnitsLost);
+    console.log("Country 2 units lost:", countryTwoUnitsLost);
+    console.log("Updated Country 1 profile:", updatedCountryOneProfile);
+    console.log("Updated Country 2 profile:", updatedCountryTwoProfile);
+
+  } else {
+    const winner = warResult.isCountryOneWinner ? "Country 1" : "Country 2";
+    const loser = warResult.isCountryTwoWinner ? "Country 1" : "Country 2";
+
+    const winnerProfile = winner === "Country 1" ? countryOneProfile : countryTwoProfile;
+    const loserProfile = winner === "Country 1" ? countryTwoProfile : countryOneProfile;
+
+    const xpGain = rewardWinner(winnerProfile.profileStats.level, true, loserProfile.profileStats.level);
+    const budgetIncrease = calculateBudgetIncrease(winnerProfile.profileStats.level, loserProfile.profileStats.level, 2500);
+
+    const winnerStats = { xpGain, budgetIncrease };
+
+    const updatedWinnerProfile = updateProfileXpAndLevel(winnerProfile, xpGain);
+    const updatedWinnerProfileWithBudget = updateProfileBudget(updatedWinnerProfile, budgetIncrease);
+
+    const winnerRemainingUnits = winner === "Country 1" ? warResult.countryOneRemainingUnits : warResult.countryTwoRemainingUnits;
+    const loserRemainingUnits = winner === "Country 1" ? warResult.countryTwoRemainingUnits : warResult.countryOneRemainingUnits;
 
     updatedWinnerProfileWithBudget.units = winnerRemainingUnits;
 
     const updatedLoserProfile = { ...loserProfile, units: loserRemainingUnits };
 
-    if (warResult.winner === "Country 1") {
+    if (winner === "Country 1") {
       updatedCountryOneProfile = updatedWinnerProfileWithBudget;
       updatedCountryTwoProfile = updatedLoserProfile;
     } else {
@@ -365,32 +311,13 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
       updatedCountryTwoProfile = updatedWinnerProfileWithBudget;
     }
 
-    console.log("Winner Rewards:", warResult.winnerStats);
+    console.log('Country One Power', warResult.countryOneTotalPower);
+    console.log('Country Two Power', warResult.countryTwoTotalPower);
+    console.log(`Winner: ${winner}`);
+    console.log(`Loser: ${loser}`);
+    console.log("Winner Rewards:", winnerStats);
     console.log("After Match Winner Profile:", updatedWinnerProfileWithBudget);
     console.log("After Match Loser Profile:", updatedLoserProfile);
-
-    /*
-    const matchResultHtml = `
-      <div>
-        <h3>Match Result</h3>
-        <p>Winner: ${warResult.winner}</p>
-        <p>Loser: ${warResult.loser}</p>
-        <p>Terrain: ${warResult.terrain}</p>
-        <p>Power (1): ${warResult.countryOneTotalPower}</p>
-        <p>Power (2): ${warResult.countryTwoTotalPower}</p>
-        <p>Lost Units (1): ${JSON.stringify(warResult.countryOneUnitsLost)}</p>
-        <p>Lost Units (2): ${JSON.stringify(warResult.countryTwoUnitsLost)}</p>
-        <p>Remaining (1): ${JSON.stringify(warResult.countryOneRemainingUnits)}</p>
-        <p>Remaining (2): ${JSON.stringify(warResult.countryTwoRemainingUnits)}</p>
-        <p>Winner Rewards: ${JSON.stringify(warResult.winnerStats)}</p>
-        <p>Updated Winner Profile: ${JSON.stringify(updatedWinnerProfileWithBudget)}</p>
-        <p>Updated Loser Profile: ${JSON.stringify(updatedLoserProfile)}</p>
-      </div>
-    `; 
-
-    // Append the match result HTML to the matchResults div
-    const matchResultsDiv = document.getElementById('matchResults');
-    matchResultsDiv.insertAdjacentHTML('beforeend', matchResultHtml); */
   }
 
   return { updatedCountryOneProfile, updatedCountryTwoProfile };
