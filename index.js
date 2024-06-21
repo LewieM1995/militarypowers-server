@@ -24,12 +24,14 @@ app.use(bodyParser.json());
 app.use("/api", userRoutes);
 
 const { runSimulation } = require("./testlogic/testlogic");
+const { generateEnemyProfiles } = require("./enemyBattles");
+const { singlePlayerRunSim } = require("./testlogic/singleTestLogic");
 
 // Example usage:
 const countryOneProfile = {
   budget: 100000,
   units: {
-    infantry: 120,
+    infantry: 250,
     navy: 5,
     airForce: 110,
     technology: 10,
@@ -41,10 +43,10 @@ const countryOneProfile = {
     xp: 0,
     nextLevelXp: 500,
     achievements: [],
-    totalBattles: 0, 
-    consecutiveWins: 0, 
-    highestEnemyLevelDefeated: 0, 
-    firstVictory: false,  
+    totalBattles: 0,
+    consecutiveWins: 0,
+    highestEnemyLevelDefeated: 0,
+    firstVictory: false,
   },
 };
 
@@ -63,25 +65,37 @@ const countryTwoProfile = {
     xp: 0,
     nextLevelXp: 500,
     achievements: [],
-    totalBattles: 0, 
-    consecutiveWins: 0, 
-    highestEnemyLevelDefeated: 0, 
-    firstVictory: false, 
+    totalBattles: 0,
+    consecutiveWins: 0,
+    highestEnemyLevelDefeated: 0,
+    firstVictory: false,
   },
 };
-
 
 let currentCountryOneProfile = countryOneProfile;
 let currentCountryTwoProfile = countryTwoProfile;
 
-for (let i = 1; i < 5; i++) {
-  const { updatedCountryOneProfile, updatedCountryTwoProfile } = runSimulation(currentCountryOneProfile, currentCountryTwoProfile);
+for (let i = 1; i < 3; i++) {
+  const { updatedCountryOneProfile, updatedCountryTwoProfile } = runSimulation(
+    currentCountryOneProfile,
+    currentCountryTwoProfile
+  );
 
   currentCountryOneProfile = updatedCountryOneProfile;
   currentCountryTwoProfile = updatedCountryTwoProfile;
-
   console.log(`After Simulation ${1 + i}:`);
 }
+
+/* const enemyProfile = generateEnemyProfiles();
+
+  for (let i = 0; i < 2; i++) {
+    let currentEnemyProfile = enemyProfile[i];
+    
+    const { updatedCountryOneProfile } = singlePlayerRunSim(currentCountryOneProfile, currentEnemyProfile);
+  
+    currentCountryOneProfile = updatedCountryOneProfile;
+    console.log(`After Simulation ${i + 1}:`, currentCountryOneProfile, currentEnemyProfile);
+  } */
 
 const server = http.createServer(app);
 //porting
