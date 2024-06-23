@@ -4,6 +4,7 @@ const http = require("http");
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const userRoutes = require("./routes/routes");
+const pool = require("./database");
 
 // App
 const app = express();
@@ -96,6 +97,15 @@ for (let i = 1; i < 3; i++) {
     currentCountryOneProfile = updatedCountryOneProfile;
     console.log(`After Simulation ${i + 1}:`, currentCountryOneProfile, currentEnemyProfile);
   } */
+
+pool.getConnection((err, connection) => {
+  if (err) {
+    console.error("Error connecting to the database:", err);
+    process.exit(1); // Exit the application if the connection fails
+  }
+  console.log("Connected to the MySQL database.");
+  connection.release(); // Release the connection back to the pool
+});
 
 const server = http.createServer(app);
 //porting
