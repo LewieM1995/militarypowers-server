@@ -98,14 +98,16 @@ for (let i = 1; i < 3; i++) {
     console.log(`After Simulation ${i + 1}:`, currentCountryOneProfile, currentEnemyProfile);
   } */
 
-pool.getConnection((err, connection) => {
-  if (err) {
+
+pool.getConnection()
+  .then(connection => {
+    console.log("Connected to the MySQL database.");
+    connection.release(); // Release the connection back to the pool
+  })
+  .catch(err => {
     console.error("Error connecting to the database:", err);
     process.exit(1); // Exit the application if the connection fails
-  }
-  console.log("Connected to the MySQL database.");
-  connection.release(); // Release the connection back to the pool
-});
+  });
 
 const server = http.createServer(app);
 //porting
