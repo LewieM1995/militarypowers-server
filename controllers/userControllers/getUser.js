@@ -1,6 +1,5 @@
 const pool = require("../../database");
 
-// Function to get user data
 const getUser = async (req, res) => {
   try {
     const query = `
@@ -56,23 +55,15 @@ const getUser = async (req, res) => {
         },
       };
 
-      delete user.budget;
-      delete user.infantry;
-      delete user.navy;
-      delete user.airForce;
-      delete user.technology;
-      delete user.logistics;
-      delete user.intelligence;
-      delete user.level;
-      delete user.xp;
-      delete user.nextLevelXp;
-      delete user.totalBattles;
-      delete user.consecutiveWins;
-      delete user.highestEnemyLevelDefeated;
-      delete user.firstVictory;
+      const responseData = {
+        userId: user.userId,
+        email: user.email,
+        countryId: user.countryId,
+        username: user.username,
+        profile,
+      };
 
-      user.profile = profile;
-      res.json(user);
+      res.json(responseData);
     } else {
       res.status(404).json({ error: "User not found" });
     }

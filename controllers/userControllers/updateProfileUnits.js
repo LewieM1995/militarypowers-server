@@ -21,18 +21,28 @@ const updateUnits = async (req, res) => {
           countryId,
         ]
       );
-      
-      console.log('UnitsResult', unitsResult)
 
       // Update budget in the country table
       await connection.query(
-        'UPDATE country SET budget = ? WHERE country.id = ?',
+        'UPDATE country SET budget = ? WHERE id = ?',
         [budget, countryId]
       );
 
       // Commit transaction
       await connection.commit();
-      res.json({ success: true });
+
+      // Fetch the updated data
+      const [updatedUserData] = await connection.query(
+        `SELECT 
+          u.infantry, u.navy, u.airForce, u.technology, u.logistics, u.intelligence, 
+          c.budget 
+         FROM units u 
+         JOIN country c ON u.country_id = c.id 
+         WHERE u.country_id = ?`,
+        [countryId]
+      );
+
+      res.json({ success: true, data: updatedUserData[0] });
     } catch (err) {
       await connection.rollback();
       throw err;

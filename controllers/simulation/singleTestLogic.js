@@ -17,6 +17,7 @@ const {
 } = require("./battleHelperFunc");
 
 const singlePlayerSimulatewar = (countryOne, enemyProfile, terrain) => {
+  console.log(countryOne)
   const countryOneTotalPower = calculateMilitaryPower(countryOne, terrain);
   const enemyProfileTotalPower = calculateMilitaryPower(enemyProfile, terrain);
 
@@ -157,11 +158,6 @@ const singlePlayerRunSim = (countryOneProfile, enemyProfileProfile) => {
   checkAndAwardAchievements(
     updatedCountryOneProfile,
     enemyProfileProfile.profileStats.level
-  );
-
-  console.log(
-    "Achievement",
-    updatedCountryOneProfile.profileStats.achievements
   );
 
   return { updatedCountryOneProfile, enemyProfileProfile };
