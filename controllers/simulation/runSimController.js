@@ -1,4 +1,4 @@
-const { generateEnemyProfiles } = require('../../enemyBattles');
+
 const pool = require('../../database');
 const { runSimulation } = require('./testlogic');
 
@@ -41,7 +41,6 @@ const runSimulationForClient = async (req, res) => {
     // Check if the enemy profile is AI or player
     const isAIProfile = currentEnemyProfile.type === 'AI'; // Adjust this based on your actual enemy profile structure
 
-    if (!isAIProfile) {
       const result = runSimulation(userProfile.profile, currentEnemyProfile);
       const updatedCountryProfile = result.updatedCountryOneProfile;
 
@@ -101,10 +100,6 @@ const runSimulationForClient = async (req, res) => {
       } finally {
         connection.release();
       }
-    } else {
-      // If the enemy profile is AI, return success without performing updates
-      res.json({ success: true, message: 'AI profile encountered, no updates performed.' });
-    }
   } catch (error) {
     console.error('Error running simulation:', error);
     res.status(500).json({ error: 'Internal Server Error' });
