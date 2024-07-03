@@ -1,111 +1,141 @@
 const terrains = ["desert", "forest", "mountain", "plains", "urban", "sea"];
 const getRandomTerrain = () => {
-  return terrains[Math.floor(Math.random() * terrains.length)];
+  try {
+    //console.log('getRandomTerrain called');
+    return terrains[Math.floor(Math.random() * terrains.length)];
+  } catch (error) {
+    console.error('Error in getRandomTerrain:', error);
+  }
 };
 
 const calculateMilitaryPower = (country, terrain) => {
-  const terrainModifiers = {
-    desert: {
-      infantry: 1.0,
-      navy: 0.7,
-      airForce: 1.5,
-      technology: 1.5,
-      logistics: 1.6,
-      intelligence: 1.2,
-    },
-    forest: {
-      infantry: 1.6,
-      navy: 0.7,
-      airForce: 1,
-      technology: 1.5,
-      logistics: 1.1,
-      intelligence: 1.7,
-    },
-    mountain: {
-      infantry: 1.6,
-      navy: 0.6,
-      airForce: 1.4,
-      technology: 1.5,
-      logistics: 1.2,
-      intelligence: 1.4,
-    },
-    plains: {
-      infantry: 1.2,
-      navy: 0.9,
-      airForce: 1.1,
-      technology: 1.5,
-      logistics: 1.0,
-      intelligence: 1.0,
-    },
-    urban: {
-      infantry: 1.0,
-      navy: 0.7,
-      airForce: 1.0,
-      technology: 1.5,
-      logistics: 1.4,
-      intelligence: 1.7,
-    },
-    sea: {
-      infantry: 0.8,
-      navy: 1.9,
-      airForce: 1.7,
-      technology: 1.5,
-      logistics: 1.0,
-      intelligence: 2,
-    },
-  };
+  try {
+    //console.log('calculateMilitaryPower called with country:', country, 'terrain:', terrain);
+    const terrainModifiers = {
+      desert: {
+        infantry: 1.0,
+        navy: 0.7,
+        airForce: 1.5,
+        technology: 1.5,
+        logistics: 1.6,
+        intelligence: 1.2,
+      },
+      forest: {
+        infantry: 1.6,
+        navy: 0.7,
+        airForce: 1,
+        technology: 1.5,
+        logistics: 1.1,
+        intelligence: 1.7,
+      },
+      mountain: {
+        infantry: 1.6,
+        navy: 0.6,
+        airForce: 1.4,
+        technology: 1.5,
+        logistics: 1.2,
+        intelligence: 1.4,
+      },
+      plains: {
+        infantry: 1.2,
+        navy: 0.9,
+        airForce: 1.1,
+        technology: 1.5,
+        logistics: 1.0,
+        intelligence: 1.0,
+      },
+      urban: {
+        infantry: 1.0,
+        navy: 0.7,
+        airForce: 1.0,
+        technology: 1.5,
+        logistics: 1.4,
+        intelligence: 1.7,
+      },
+      sea: {
+        infantry: 0.8,
+        navy: 1.9,
+        airForce: 1.7,
+        technology: 1.5,
+        logistics: 1.0,
+        intelligence: 2,
+      },
+    };
 
-  const modifiers = terrainModifiers[terrain];
+    const modifiers = terrainModifiers[terrain];
 
-  return (
-    country.units.infantry * 1 * modifiers.infantry +
-    country.units.navy * 1 * modifiers.navy +
-    country.units.airForce * 1 * modifiers.airForce +
-    country.units.technology * 1 * modifiers.technology +
-    country.units.logistics * 1 * modifiers.logistics +
-    country.units.intelligence * 2 * modifiers.intelligence
-  );
+    return (
+      country.units.infantry * 1 * modifiers.infantry +
+      country.units.navy * 1 * modifiers.navy +
+      country.units.airForce * 1 * modifiers.airForce +
+      country.units.technology * 1 * modifiers.technology +
+      country.units.logistics * 1 * modifiers.logistics +
+      country.units.intelligence * 2 * modifiers.intelligence
+    );
+  } catch (error) {
+    console.error('Error in calculateMilitaryPower:', error);
+  }
 };
 
 const calculateRemainingUnits = (initialUnits, lossPercentage, isWinner) => {
-  const remainingUnits = {};
-  const lossFactor = isWinner ? 1 - lossPercentage / 10 : 1 - lossPercentage;
-  console.log("this is loss factor", lossFactor);
+  try {
+    //console.log('calculateRemainingUnits called with initialUnits:', initialUnits, 'lossPercentage:', lossPercentage, 'isWinner:', isWinner);
+    const remainingUnits = {};
+    const lossFactor = isWinner ? 1 - lossPercentage / 10 : 1 - lossPercentage;
+    console.log("this is loss factor", lossFactor);
 
-  for (const unit in initialUnits) {
-    if (initialUnits.hasOwnProperty(unit)) {
-      remainingUnits[unit] = Math.floor(initialUnits[unit] * lossFactor);
+    for (const unit in initialUnits) {
+      if (initialUnits.hasOwnProperty(unit)) {
+        remainingUnits[unit] = Math.floor(initialUnits[unit] * lossFactor);
+      }
     }
-  }
 
-  return remainingUnits;
+    return remainingUnits;
+  } catch (error) {
+    console.error('Error in calculateRemainingUnits:', error);
+  }
 };
 
 const calculateUnitsLost = (initialUnits, remainingUnits) => {
-  const unitsLost = {};
-  for (const unit in initialUnits) {
-    if (initialUnits.hasOwnProperty(unit)) {
-      unitsLost[unit] = initialUnits[unit] - remainingUnits[unit];
+  try {
+    //console.log('calculateUnitsLost called with initialUnits:', initialUnits, 'remainingUnits:', remainingUnits);
+    const unitsLost = {};
+    for (const unit in initialUnits) {
+      if (initialUnits.hasOwnProperty(unit)) {
+        unitsLost[unit] = initialUnits[unit] - remainingUnits[unit];
+      }
     }
+    return unitsLost;
+  } catch (error) {
+    console.error('Error in calculateUnitsLost:', error);
   }
-  return unitsLost;
 };
 
 const applyStalemateLossRate = (units) => {
-  const stalemateLossRate = 0.05;
-  const lossUnits = {};
-  for (const unit in units) {
-    if (units.hasOwnProperty(unit)) {
-      lossUnits[unit] = Math.floor(units[unit] * stalemateLossRate);
+  try {
+    //console.log('applyStalemateLossRate called with units:', units);
+    const stalemateLossRate = 0.05;
+    const lossUnits = {};
+    for (const unit in units) {
+      if (units.hasOwnProperty(unit)) {
+        lossUnits[unit] = Math.floor(units[unit] * stalemateLossRate);
+      }
     }
+    return lossUnits;
+  } catch (error) {
+    console.error('Error in applyStalemateLossRate:', error);
   }
-  return lossUnits;
 };
 
 const calculateLossPercentage = (winnerPower, loserPower) => {
-  const totalPower = winnerPower + loserPower;
-  const powerDifference = winnerPower - loserPower;
-  return Math.abs(powerDifference) / totalPower;
+  try {
+    //console.log('calculateLossPercentage called with winnerPower:', winnerPower, 'loserPower:', loserPower);
+    const totalPower = winnerPower + loserPower;
+    const powerDifference = winnerPower - loserPower;
+    return Math.abs(powerDifference) / totalPower;
+  } catch (error) {
+    console.error('Error in calculateLossPercentage:', error);
+  }
 };
 
 const updateDOMWithResults = (
@@ -120,134 +150,190 @@ const updateDOMWithResults = (
   enemyProfileRemainingUnits,
   winnerStats
 ) => {
-  const winnerElement = document.getElementById("winner");
-  winnerElement.textContent = winner;
-  const loserElement = document.getElementById("loser");
-  loserElement.textContent = loser;
-  const terrainElement = document.getElementById("terrain");
-  terrainElement.textContent = terrain;
-  const powerElement = document.getElementById("countryOnePower");
-  powerElement.textContent = countryOneTotalPower;
-  const powerTElement = document.getElementById("enemyProfilePower");
-  powerTElement.textContent = enemyProfileTotalPower;
-  const lostElement = document.getElementById("countryOneUnitsLost");
-  lostElement.textContent = JSON.stringify(countryOneUnitsLost, null, 2);
-  const lostTElement = document.getElementById("enemyProfileUnitsLost");
-  lostTElement.textContent = JSON.stringify(enemyProfileUnitsLost, null, 2);
-  const leftElement = document.getElementById("countryOneRemainingUnits");
-  leftElement.textContent = JSON.stringify(countryOneRemainingUnits, null, 2);
-  const leftTElement = document.getElementById("enemyProfileRemainingUnits");
-  leftTElement.textContent = JSON.stringify(enemyProfileRemainingUnits, null, 2);
-  const winnerRewardsElement = document.getElementById("winnerStats");
-  winnerRewardsElement.textContent = JSON.stringify(winnerStats, null, 2);
+  try {
+    //console.log('updateDOMWithResults called with winner:', winner, 'loser:', loser, 'terrain:', terrain, 'countryOneTotalPower:', countryOneTotalPower, 'enemyProfileTotalPower:', enemyProfileTotalPower, 'countryOneUnitsLost:', countryOneUnitsLost, 'enemyProfileUnitsLost:', enemyProfileUnitsLost, 'countryOneRemainingUnits:', countryOneRemainingUnits, 'enemyProfileRemainingUnits:', enemyProfileRemainingUnits, 'winnerStats:', winnerStats);
+    const winnerElement = document.getElementById("winner");
+    winnerElement.textContent = winner;
+    const loserElement = document.getElementById("loser");
+    loserElement.textContent = loser;
+    const terrainElement = document.getElementById("terrain");
+    terrainElement.textContent = terrain;
+    const powerElement = document.getElementById("countryOnePower");
+    powerElement.textContent = countryOneTotalPower;
+    const powerTElement = document.getElementById("enemyProfilePower");
+    powerTElement.textContent = enemyProfileTotalPower;
+    const lostElement = document.getElementById("countryOneUnitsLost");
+    lostElement.textContent = JSON.stringify(countryOneUnitsLost, null, 2);
+    const lostTElement = document.getElementById("enemyProfileUnitsLost");
+    lostTElement.textContent = JSON.stringify(enemyProfileUnitsLost, null, 2);
+    const leftElement = document.getElementById("countryOneRemainingUnits");
+    leftElement.textContent = JSON.stringify(countryOneRemainingUnits, null, 2);
+    const leftTElement = document.getElementById("enemyProfileRemainingUnits");
+    leftTElement.textContent = JSON.stringify(enemyProfileRemainingUnits, null, 2);
+    const winnerRewardsElement = document.getElementById("winnerStats");
+    winnerRewardsElement.textContent = JSON.stringify(winnerStats, null, 2);
+  } catch (error) {
+    console.error('Error in updateDOMWithResults:', error);
+  }
 };
 
 const rewardWinner = (level, isWinner, enemyLevel) => {
-  let xpGain;
-  if (isWinner) {
-    if (level > enemyLevel) {
-      xpGain = (level + enemyLevel) * 100; // Example calculation for XP gain
-      return xpGain;
-    } else {
-      xpGain = (level + enemyLevel) * 2 * 100;
-      return xpGain;
+  try {
+    //console.log('rewardWinner called with level:', level, 'isWinner:', isWinner, 'enemyLevel:', enemyLevel);
+    let xpGain;
+    if (isWinner) {
+      if (level > enemyLevel) {
+        xpGain = (level + enemyLevel) * 100; // Example calculation for XP gain
+        return xpGain;
+      } else {
+        xpGain = (level + enemyLevel) * 2 * 100;
+        return xpGain;
+      }
     }
+    return 0;
+  } catch (error) {
+    console.error('Error in rewardWinner:', error);
   }
-  return 0;
 };
 
 const calculateBudgetIncrease = (winnerLevel, enemyLevel, initValue) => {
-  let levelFactor;
+  try {
+    //console.log('calculateBudgetIncrease called with winnerLevel:', winnerLevel, 'enemyLevel:', enemyLevel, 'initValue:', initValue);
+    let levelFactor;
 
-  if (winnerLevel > enemyLevel) {
-    levelFactor = (winnerLevel + enemyLevel) / 2; // Example calculation based on the winner's level
-  } else {
-    levelFactor = ((winnerLevel + enemyLevel) * 2) / 2.5; // Example calculation based on the winner's and enemy's levels
+    if (winnerLevel > enemyLevel) {
+      levelFactor = (winnerLevel + enemyLevel) / 2; // Example calculation based on the winner's level
+    } else {
+      levelFactor = ((winnerLevel + enemyLevel) * 2) / 2.5; // Example calculation based on the winner's and enemy's levels
+    }
+
+    const budgetIncrease = initValue * levelFactor;
+    return budgetIncrease;
+  } catch (error) {
+    console.error('Error in calculateBudgetIncrease:', error);
   }
-
-  const budgetIncrease = initValue * levelFactor;
-  return budgetIncrease;
 };
 
 const updateProfileBudget = (profile, budgetIncrease) => {
-  profile.budget += budgetIncrease;
-  return profile;
+  try {
+    //console.log('updateProfileBudget called with profile:', profile, 'budgetIncrease:', budgetIncrease);
+
+    // Convert the budget to a number before performing arithmetic operations
+    profile.budget = parseFloat(profile.budget) + budgetIncrease;
+
+    // Ensure the budget is a string formatted to two decimal places
+    profile.budget = profile.budget.toFixed(2);
+
+    return profile;
+  } catch (error) {
+    console.error('Error in updateProfileBudget:', error);
+  }
 };
 
 const updateProfileXpAndLevel = (profile, xpGain) => {
-  const { level, xp, nextLevelXp } = profile.profileStats;
-  let updatedXp = xp + xpGain;
-  let updatedLevel = level;
-  let updatedNextLevelXp = nextLevelXp;
+  try {
+    //console.log('updateProfileXpAndLevel called with profile:', profile, 'xpGain:', xpGain);
+    const { level, xp, nextLevelXp } = profile.profileStats;
+    let updatedXp = xp + xpGain;
+    let updatedLevel = level;
+    let updatedNextLevelXp = nextLevelXp;
 
-  while (updatedXp >= updatedNextLevelXp) {
-    updatedXp -= updatedNextLevelXp;
-    updatedLevel += 1;
-    updatedNextLevelXp *= 1.5; // Assuming the XP required for the next level doubles
+    while (updatedXp >= updatedNextLevelXp) {
+      updatedXp -= updatedNextLevelXp;
+      updatedLevel += 1;
+      updatedNextLevelXp *= 1.5; // Assuming the XP required for the next level doubles
+    }
+
+    const updatedProfileStats = {
+      ...profile.profileStats,
+      level: updatedLevel,
+      xp: updatedXp,
+      nextLevelXp: updatedNextLevelXp,
+    };
+
+    return {
+      ...profile,
+      profileStats: updatedProfileStats,
+    };
+  } catch (error) {
+    console.error('Error in updateProfileXpAndLevel:', error);
   }
-
-  const updatedProfileStats = {
-    ...profile.profileStats,
-    level: updatedLevel,
-    xp: updatedXp,
-    nextLevelXp: updatedNextLevelXp,
-  };
-
-  return {
-    ...profile,
-    profileStats: updatedProfileStats,
-  };
 };
 
 const updateBattleStats = (winnerStats, isWinner) => {
-  if (isWinner){
-    return winnerStats + 1
+  try {
+    //console.log('updateBattleStats called with winnerStats:', winnerStats, 'isWinner:', isWinner);
+    if (isWinner){
+      return winnerStats + 1;
+    }
+    return winnerStats;
+  } catch (error) {
+    console.error('Error in updateBattleStats:', error);
   }
-  return winnerStats;
 };
 
 const updateConsecutiveWins = (winnerStats, isWinner) => {
-  if (isWinner){
-    return winnerStats + 1;
-  } else {
-    winnerStats = 0;
+  try {
+    //console.log('updateConsecutiveWins called with winnerStats:', winnerStats, 'isWinner:', isWinner);
+    if (isWinner){
+      return winnerStats + 1;
+    } else {
+      winnerStats = 0;
+    }
+    return winnerStats;
+  } catch (error) {
+    console.error('Error in updateConsecutiveWins:', error);
   }
-  return winnerStats;
 };
 
 const updateHighestEnemyLevelDefeated = (winnerStats, enemyLevel, isWinner) => {
-  if (isWinner){
-    winnerStats = enemyLevel;
+  try {
+    //console.log('updateHighestEnemyLevelDefeated called with winnerStats:', winnerStats, 'enemyLevel:', enemyLevel, 'isWinner:', isWinner);
+    if (isWinner){
+      winnerStats = enemyLevel;
+    }
+    return winnerStats;
+  } catch (error) {
+    console.error('Error in updateHighestEnemyLevelDefeated:', error);
   }
-  return winnerStats;
 };
 
 const updateFirstwin= (winnerStats, isWinner) => {
-  if (isWinner){
-    winnerStats = true;
+  try {
+    //console.log('updateFirstwin called with winnerStats:', winnerStats, 'isWinner:', isWinner);
+    if (isWinner){
+      winnerStats = true;
+    }
+    return winnerStats;
+  } catch (error) {
+    console.error('Error in updateFirstwin:', error);
   }
-  return winnerStats;
 };
 
 const checkAndAwardAchievements = (playerProfile, enemyLevel) => {
-  if (!Array.isArray(playerProfile.profileStats.achievements)) {
-    playerProfile.profileStats.achievements = [];
-  }
-
-  achievementCriteria.forEach((achievement) => {
-    if (
-      achievement.checkCriteria(playerProfile, enemyLevel) &&
-      !playerProfile.profileStats.achievements.some((ach) => ach.id === achievement.id)
-    ) {
-      playerProfile.profileStats.achievements.push({
-        id: achievement.id,
-        name: achievement.name,
-        description: achievement.description,
-        icon: achievement.icon,
-      });
-      console.log(`${playerProfile.name} earned the "${achievement.name}" achievement!`);
+  try {
+    //console.log('checkAndAwardAchievements called with playerProfile:', playerProfile, 'enemyLevel:', enemyLevel);
+    if (!Array.isArray(playerProfile.profileStats.achievements)) {
+      playerProfile.profileStats.achievements = [];
     }
-  });
+
+    achievementCriteria.forEach((achievement) => {
+      if (
+        achievement.checkCriteria(playerProfile, enemyLevel) &&
+        !playerProfile.profileStats.achievements.some((ach) => ach.id === achievement.id)
+      ) {
+        playerProfile.profileStats.achievements.push({
+          id: achievement.id,
+          name: achievement.name,
+          description: achievement.description,
+          icon: achievement.icon,
+        });
+        //console.log(`${playerProfile.name} earned the "${achievement.name}" achievement!`);
+      }
+    });
+  } catch (error) {
+    console.error('Error in checkAndAwardAchievements:', error);
+  }
 };
 
 const achievementCriteria = [
@@ -280,7 +366,7 @@ const achievementCriteria = [
     icon: null
   },
 ];
-  
+
 module.exports = {
   getRandomTerrain,
   calculateMilitaryPower,

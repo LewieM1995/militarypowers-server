@@ -147,8 +147,6 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
   checkAndAwardAchievements(updatedCountryOneProfile, updatedCountryTwoProfile.profileStats.level);
   checkAndAwardAchievements(updatedCountryTwoProfile, updatedCountryOneProfile.profileStats.level);
 
-  console.log('Achievement', updatedCountryOneProfile.profileStats.achievements)
-
   return { updatedCountryOneProfile, updatedCountryTwoProfile };
 };
 

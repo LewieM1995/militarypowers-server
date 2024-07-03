@@ -5,6 +5,7 @@ require("dotenv").config();
 const bodyParser = require("body-parser");
 const userRoutes = require("./routes/routes");
 const pool = require("./database");
+const fs = require('fs');
 
 // App
 const app = express();
