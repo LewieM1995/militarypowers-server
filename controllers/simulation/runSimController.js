@@ -91,7 +91,8 @@ const runSimulationForClient = async (req, res) => {
 
         // Commit the transaction
         await connection.commit();
-        res.json({ success: true, message: 'Profile updated successfully in the database.' });
+        //console.log('updatedCountryProfile', updatedCountryProfile)
+        res.json({ success: true, message: 'Profile updated successfully in the database.', data: updatedCountryProfile });
       } catch (error) {
         // Rollback the transaction in case of error
         await connection.rollback();
