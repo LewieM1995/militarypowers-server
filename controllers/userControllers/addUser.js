@@ -1,18 +1,23 @@
 const pool = require('../../database');
 const initialProfile = require('./initProfile');
+const bcrypt = require('bcrypt');
 
 const addUser = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Get a database connection
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
 
       // Insert into user table
       const [userResults] = await connection.query(
-        'INSERT INTO user (username, email, password) VALUES (?, ?)',
-        [username, email, password]
+        'INSERT INTO user (email, password) VALUES (?, ?)',
+        [ email, hashedPassword]
       );
       const userId = userResults.insertId;
 
@@ -52,17 +57,18 @@ const addUser = async (req, res) => {
         ]
       );
 
-      // Commit transaction
+      // Commit the transaction
       await connection.commit();
       res.json({ success: true });
     } catch (err) {
       await connection.rollback();
-      throw err;
+      console.error('Error during transaction:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
     } finally {
       connection.release();
     }
   } catch (err) {
-    console.error('Error during transaction:', err);
+    console.error('Error hashing password or getting connection:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };

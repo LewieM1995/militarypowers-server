@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post('/check-user', checkUser );
 router.post('/add-user', addUser );
-router.get('/get-user', getUser );
+router.get('/get-user/:email', getUser );
 router.post('/updateUnits', updateUnits);
 router.post('/runSPSimulation', runSimulationForClient)
 router.post('/war-room', warRoom)

@@ -138,45 +138,6 @@ const calculateLossPercentage = (winnerPower, loserPower) => {
   }
 };
 
-const updateDOMWithResults = (
-  winner,
-  loser,
-  terrain,
-  countryOneTotalPower,
-  enemyProfileTotalPower,
-  countryOneUnitsLost,
-  enemyProfileUnitsLost,
-  countryOneRemainingUnits,
-  enemyProfileRemainingUnits,
-  winnerStats
-) => {
-  try {
-    //console.log('updateDOMWithResults called with winner:', winner, 'loser:', loser, 'terrain:', terrain, 'countryOneTotalPower:', countryOneTotalPower, 'enemyProfileTotalPower:', enemyProfileTotalPower, 'countryOneUnitsLost:', countryOneUnitsLost, 'enemyProfileUnitsLost:', enemyProfileUnitsLost, 'countryOneRemainingUnits:', countryOneRemainingUnits, 'enemyProfileRemainingUnits:', enemyProfileRemainingUnits, 'winnerStats:', winnerStats);
-    const winnerElement = document.getElementById("winner");
-    winnerElement.textContent = winner;
-    const loserElement = document.getElementById("loser");
-    loserElement.textContent = loser;
-    const terrainElement = document.getElementById("terrain");
-    terrainElement.textContent = terrain;
-    const powerElement = document.getElementById("countryOnePower");
-    powerElement.textContent = countryOneTotalPower;
-    const powerTElement = document.getElementById("enemyProfilePower");
-    powerTElement.textContent = enemyProfileTotalPower;
-    const lostElement = document.getElementById("countryOneUnitsLost");
-    lostElement.textContent = JSON.stringify(countryOneUnitsLost, null, 2);
-    const lostTElement = document.getElementById("enemyProfileUnitsLost");
-    lostTElement.textContent = JSON.stringify(enemyProfileUnitsLost, null, 2);
-    const leftElement = document.getElementById("countryOneRemainingUnits");
-    leftElement.textContent = JSON.stringify(countryOneRemainingUnits, null, 2);
-    const leftTElement = document.getElementById("enemyProfileRemainingUnits");
-    leftTElement.textContent = JSON.stringify(enemyProfileRemainingUnits, null, 2);
-    const winnerRewardsElement = document.getElementById("winnerStats");
-    winnerRewardsElement.textContent = JSON.stringify(winnerStats, null, 2);
-  } catch (error) {
-    console.error('Error in updateDOMWithResults:', error);
-  }
-};
-
 const rewardWinner = (level, isWinner, enemyLevel) => {
   try {
     //console.log('rewardWinner called with level:', level, 'isWinner:', isWinner, 'enemyLevel:', enemyLevel);

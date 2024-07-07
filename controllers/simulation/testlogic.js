@@ -97,7 +97,6 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     console.log("Updated Country 2 profile:", updatedCountryTwoProfile);
 
   } else {
-
     const winnerProfile = warResult.isCountryOneWinner ? countryOneProfile : countryTwoProfile;
     const loserProfile = warResult.isCountryOneWinner ? countryTwoProfile : countryOneProfile;
 
@@ -128,11 +127,23 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     const updatedLoserProfile = { ...loserProfile, units: loserRemainingUnits };
 
     if (warResult.isCountryOneWinner) {
-      updatedCountryOneProfile = updatedWinnerProfileWithBudget;
-      updatedCountryTwoProfile = updatedLoserProfile;
+      if (countryTwoProfile.type === 'AI') {
+        // Only update the winner profile if the loser is AI
+        updatedCountryOneProfile = updatedWinnerProfileWithBudget;
+      } else {
+        // Update both profiles if the loser is not AI
+        updatedCountryOneProfile = updatedWinnerProfileWithBudget;
+        updatedCountryTwoProfile = updatedLoserProfile;
+      }
     } else {
-      updatedCountryOneProfile = updatedLoserProfile;
-      updatedCountryTwoProfile = updatedWinnerProfileWithBudget;
+      if (countryOneProfile.type === 'AI') {
+        // Only update the winner profile if the loser is AI
+        updatedCountryTwoProfile = updatedWinnerProfileWithBudget;
+      } else {
+        // Update both profiles if the loser is not AI
+        updatedCountryTwoProfile = updatedWinnerProfileWithBudget;
+        updatedCountryOneProfile = updatedLoserProfile;
+      }
     }
 
     console.log('Country One Power', warResult.countryOneTotalPower);
@@ -147,6 +158,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
   checkAndAwardAchievements(updatedCountryOneProfile, updatedCountryTwoProfile.profileStats.level);
   checkAndAwardAchievements(updatedCountryTwoProfile, updatedCountryOneProfile.profileStats.level);
 
+  console.log(updatedCountryOneProfile)
   return { updatedCountryOneProfile, updatedCountryTwoProfile };
 };
 

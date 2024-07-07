@@ -5,11 +5,11 @@ const initialProfile = {
       navy: 5,
       airForce: 50,
       technology: 10,
-      logistics: 2,
+      logistics: 0,
       intelligence: 10,
     },
     profileStats: {
-      level: 10,
+      level: 1,
       xp: 0,
       nextLevelXp: 500,
       totalBattles: 0,

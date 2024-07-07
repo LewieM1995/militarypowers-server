@@ -7,7 +7,7 @@ const warRoom = async (req, res) => {
     return res.status(400).json({ error: "Invalid player level" });
   }
 
-  const minLevel = playerLevel - 5;
+  const minLevel = playerLevel - 3;
   const maxLevel = playerLevel + 10;
 
   try {

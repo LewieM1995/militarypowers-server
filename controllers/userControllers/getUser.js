@@ -2,12 +2,18 @@ const pool = require("../../database");
 
 const getUser = async (req, res) => {
   try {
+    const { email } = req.params;  // Extract email from request parameters
+
+    if (!email) {
+      return res.status(400).json({ error: "email is required" });  // Validate email
+    }
+
     const query = `
       SELECT
         u.id AS userId,
-        u.username AS email,
+        u.email AS email,
         c.id AS countryId,
-        c.name AS username,
+        c.name AS name,
         c.budget,
         u2.infantry,
         u2.navy,
@@ -21,19 +27,43 @@ const getUser = async (req, res) => {
         ps.totalBattles,
         ps.consecutiveWins,
         ps.highestEnemyLevelDefeated,
-        ps.firstVictory
+        ps.firstVictory,
+        a.id AS achievementId,
+        a.name AS achievementName,
+        a.description AS achievementDescription
       FROM
         user u
         INNER JOIN country c ON u.id = c.user_id
         INNER JOIN units u2 ON c.id = u2.country_id
         INNER JOIN profile_stats ps ON c.id = ps.country_id
-      LIMIT 1`;
+        LEFT JOIN user_achievements ua ON u.id = ua.user_id
+        LEFT JOIN achievements a ON ua.achievement_id = a.id
+      WHERE
+        u.email = ?
+    `;
 
-    const [results] = await pool.query(query);
+    const [results] = await pool.query(query, [email]);  // Pass the email as a parameter
 
     if (results.length > 0) {
+      // Extract user data
       const user = results[0];
 
+      // Collect achievements, ensuring to avoid duplicates
+      const achievements = results
+        .filter(row => row.achievementId)  // Filter out rows without achievement data
+        .map(row => ({
+          id: row.achievementId,
+          name: row.achievementName,
+          description: row.achievementDescription,
+        }))
+        .reduce((uniqueAchievements, current) => {
+          if (!uniqueAchievements.find(achievement => achievement.id === current.id)) {
+            uniqueAchievements.push(current);
+          }
+          return uniqueAchievements;
+        }, []);
+
+      // Construct the profile object
       const profile = {
         budget: user.budget,
         units: {
@@ -52,17 +82,19 @@ const getUser = async (req, res) => {
           consecutiveWins: user.consecutiveWins,
           highestEnemyLevelDefeated: user.highestEnemyLevelDefeated,
           firstVictory: user.firstVictory === 1,
+          achievements,  // Add achievements here
         },
       };
 
+      // Construct the response data
       const responseData = {
         userId: user.userId,
         email: user.email,
         countryId: user.countryId,
-        username: user.username,
+        email: user.email,
         profile,
       };
-
+      
       res.json(responseData);
     } else {
       res.status(404).json({ error: "User not found" });
