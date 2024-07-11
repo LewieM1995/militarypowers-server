@@ -233,7 +233,7 @@ const updateBattleStats = (winnerStats, isWinner) => {
   }
 };
 
-const updateConsecutiveWins = (winnerStats, isWinner) => {
+const updateTotalWins = (winnerStats, isWinner) => {
   try {
     //console.log('updateConsecutiveWins called with winnerStats:', winnerStats, 'isWinner:', isWinner);
     if (isWinner){
@@ -243,7 +243,7 @@ const updateConsecutiveWins = (winnerStats, isWinner) => {
     }
     return winnerStats;
   } catch (error) {
-    console.error('Error in updateConsecutiveWins:', error);
+    console.error('Error in updateTotalWins:', error);
   }
 };
 
@@ -309,7 +309,7 @@ const achievementCriteria = [
     id: 2,
     name: 'Unstoppable',
     description: 'Win 5 battles in a row',
-    checkCriteria: (profile) => profile.profileStats.consecutiveWins >= 5,
+    checkCriteria: (profile) => profile.profileStats.total_wins >= 5,
     icon: null
   },
   {
@@ -340,7 +340,7 @@ module.exports = {
   updateProfileBudget,
   updateProfileXpAndLevel,
   updateBattleStats,
-  updateConsecutiveWins,
+  updateTotalWins,
   updateHighestEnemyLevelDefeated,
   updateFirstwin,
   checkAndAwardAchievements

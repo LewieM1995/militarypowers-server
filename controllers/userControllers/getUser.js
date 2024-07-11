@@ -1,4 +1,5 @@
 const pool = require("../../database");
+const { format } = require('date-fns');
 
 const getUser = async (req, res) => {
   try {
@@ -25,12 +26,13 @@ const getUser = async (req, res) => {
         ps.xp,
         ps.nextLevelXp,
         ps.totalBattles,
-        ps.consecutiveWins,
+        ps.total_wins,
         ps.highestEnemyLevelDefeated,
         ps.firstVictory,
         a.id AS achievementId,
         a.name AS achievementName,
-        a.description AS achievementDescription
+        a.description AS achievementDescription,
+        ua.achieved_at AS achievedAt  -- Fix the typo and ensure the correct table alias
       FROM
         user u
         INNER JOIN country c ON u.id = c.user_id
@@ -55,6 +57,7 @@ const getUser = async (req, res) => {
           id: row.achievementId,
           name: row.achievementName,
           description: row.achievementDescription,
+          date: format(new Date(row.achievedAt), 'MMMM d, yyyy')
         }))
         .reduce((uniqueAchievements, current) => {
           if (!uniqueAchievements.find(achievement => achievement.id === current.id)) {
@@ -79,7 +82,7 @@ const getUser = async (req, res) => {
           xp: user.xp,
           nextLevelXp: user.nextLevelXp,
           totalBattles: user.totalBattles,
-          consecutiveWins: user.consecutiveWins,
+          total_wins: user.total_wins,
           highestEnemyLevelDefeated: user.highestEnemyLevelDefeated,
           firstVictory: user.firstVictory === 1,
           achievements,  // Add achievements here
@@ -91,10 +94,9 @@ const getUser = async (req, res) => {
         userId: user.userId,
         email: user.email,
         countryId: user.countryId,
-        email: user.email,
         profile,
       };
-      
+
       res.json(responseData);
     } else {
       res.status(404).json({ error: "User not found" });

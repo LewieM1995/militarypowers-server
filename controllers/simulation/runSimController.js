@@ -13,6 +13,7 @@ const runSimulationForClient = async (req, res) => {
   };
 
   const enemyAIProfile = {
+    budget: 0,
     type: 'AI',
     id: enemyProfile.id,
     name: enemyProfile.name,
@@ -32,7 +33,18 @@ const runSimulationForClient = async (req, res) => {
 
   try {
     const result = runSimulation(userProfile.profile, enemyAIProfile);
-    const updatedCountryProfile = userProfile.profile.type === 'AI' ? result.updatedCountryTwoProfile : result.updatedCountryOneProfile;
+
+    const updatedCountryOneProfile = result.updatedCountryOneProfile;
+
+    const isCountryOneWinner = result.isCountryOneWinner;
+    console.log(isCountryOneWinner)
+    const isStalemate = result.isStalemate;
+    const rewards = result.rewards;
+    const loserRewards = result.loserRewards;
+    const matchStats = result.matchStats;
+
+    console.log(matchStats);
+    console.log(rewards);
 
     const updateCountryQuery = `
       UPDATE country
@@ -48,7 +60,7 @@ const runSimulationForClient = async (req, res) => {
 
     const updateProfileStatsQuery = `
       UPDATE profile_stats
-      SET level = ?, xp = ?, nextLevelXp = ?, totalBattles = ?, consecutiveWins = ?, highestEnemyLevelDefeated = ?, firstVictory = ?
+      SET level = ?, xp = ?, nextLevelXp = ?, totalBattles = ?, total_wins = ?, highestEnemyLevelDefeated = ?, firstVictory = ?
       WHERE country_id = ?;
     `;
 
@@ -61,33 +73,59 @@ const runSimulationForClient = async (req, res) => {
     try {
       await connection.beginTransaction();
 
-      await connection.query(updateCountryQuery, [updatedCountryProfile.budget, countryId]);
+      // Update the user's profile (CountryOne) in the database
+      await connection.query(updateCountryQuery, [updatedCountryOneProfile.budget, countryId]);
       await connection.query(updateUnitsQuery, [
-        updatedCountryProfile.units.infantry,
-        updatedCountryProfile.units.navy,
-        updatedCountryProfile.units.airForce,
-        updatedCountryProfile.units.technology,
-        updatedCountryProfile.units.logistics,
-        updatedCountryProfile.units.intelligence,
+        updatedCountryOneProfile.units.infantry,
+        updatedCountryOneProfile.units.navy,
+        updatedCountryOneProfile.units.airForce,
+        updatedCountryOneProfile.units.technology,
+        updatedCountryOneProfile.units.logistics,
+        updatedCountryOneProfile.units.intelligence,
         countryId
       ]);
       await connection.query(updateProfileStatsQuery, [
-        updatedCountryProfile.profileStats.level,
-        updatedCountryProfile.profileStats.xp,
-        updatedCountryProfile.profileStats.nextLevelXp,
-        updatedCountryProfile.profileStats.totalBattles,
-        updatedCountryProfile.profileStats.consecutiveWins,
-        updatedCountryProfile.profileStats.highestEnemyLevelDefeated,
-        updatedCountryProfile.profileStats.firstVictory ? 1 : 0,
+        updatedCountryOneProfile.profileStats.level,
+        updatedCountryOneProfile.profileStats.xp,
+        updatedCountryOneProfile.profileStats.nextLevelXp,
+        updatedCountryOneProfile.profileStats.totalBattles,
+        updatedCountryOneProfile.profileStats.total_wins,
+        updatedCountryOneProfile.profileStats.highestEnemyLevelDefeated,
+        updatedCountryOneProfile.profileStats.firstVictory ? 1 : 0,
         countryId
       ]);
 
-      for (const achievement of updatedCountryProfile.profileStats.achievements) {
+      for (const achievement of updatedCountryOneProfile.profileStats.achievements) {
         await connection.query(insertUserAchievementQuery, [userId, achievement.id, new Date()]);
-      }   
+      }
 
       await connection.commit();
-      res.json({ success: true, message: 'Profile updated successfully in the database.', data: updatedCountryProfile });
+
+      // Determine the response based on the outcome
+      if (isStalemate) {
+        res.json({
+          success: true,
+          message: 'Profile updated successfully in the database. The battle ended in a stalemate.',
+          data: updatedCountryOneProfile,
+          matchStats: matchStats
+        });
+      } else if (isCountryOneWinner) {
+        res.json({
+          success: true,
+          message: 'Profile updated successfully in the database. You won the battle!',
+          data: updatedCountryOneProfile,
+          rewards: rewards,
+          matchStats: matchStats
+        });
+      } else {
+        res.json({
+          success: true,
+          message: 'Profile updated successfully in the database. You lost the battle.',
+          data: updatedCountryOneProfile,
+          rewards: loserRewards,
+          matchStats: matchStats
+        });
+      }
     } catch (error) {
       await connection.rollback();
       console.error('Error running simulation and updating database:', error);

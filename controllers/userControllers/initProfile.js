@@ -13,7 +13,7 @@ const initialProfile = {
       xp: 0,
       nextLevelXp: 500,
       totalBattles: 0,
-      consecutiveWins: 0,
+      total_wins: 0,
       highestEnemyLevelDefeated: 0,
       firstVictory: false,
     },

@@ -51,7 +51,7 @@ const addUser = async (req, res) => {
           initialProfile.profileStats.xp,
           initialProfile.profileStats.nextLevelXp,
           initialProfile.profileStats.totalBattles,
-          initialProfile.profileStats.consecutiveWins,
+          initialProfile.profileStats.total_wins,
           initialProfile.profileStats.highestEnemyLevelDefeated,
           initialProfile.profileStats.firstVictory ? 1 : 0,
         ]

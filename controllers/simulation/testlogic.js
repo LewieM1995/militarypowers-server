@@ -10,7 +10,7 @@ const {
   updateProfileBudget,
   updateProfileXpAndLevel,
   updateBattleStats,
-  updateConsecutiveWins,
+  updateTotalWins,
   updateHighestEnemyLevelDefeated,
   updateFirstwin,
   checkAndAwardAchievements,
@@ -73,6 +73,9 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
 
   let updatedCountryOneProfile = countryOneProfile;
   let updatedCountryTwoProfile = countryTwoProfile;
+  let rewards = null;
+  let loserRewards = null;
+  let matchStats = null;
 
   if (warResult.isStalemate) {
     const countryOneUnitsLost = applyStalemateLossRate(countryOneProfile.units);
@@ -90,76 +93,84 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
       units: countryTwoRemainingUnits,
     };
 
-    console.log("Stalemate");
-    console.log("Country 1 units lost:", countryOneUnitsLost);
-    console.log("Country 2 units lost:", countryTwoUnitsLost);
-    console.log("Updated Country 1 profile:", updatedCountryOneProfile);
-    console.log("Updated Country 2 profile:", updatedCountryTwoProfile);
+    loserRewards = 'The battle ended in a stalemate. Both sides suffered losses.';
 
-  } else {
-    const winnerProfile = warResult.isCountryOneWinner ? countryOneProfile : countryTwoProfile;
-    const loserProfile = warResult.isCountryOneWinner ? countryTwoProfile : countryOneProfile;
-
-    const xpGain = rewardWinner(winnerProfile.profileStats.level, true, loserProfile.profileStats.level);
-    const budgetIncrease = calculateBudgetIncrease(winnerProfile.profileStats.level, loserProfile.profileStats.level, 2500);
+  } else if (warResult.isCountryOneWinner) {
+    // Handle CountryOne wins case
+    const xpGain = rewardWinner(countryOneProfile.profileStats.level, true, countryTwoProfile.profileStats.level);
+    const budgetIncrease = calculateBudgetIncrease(countryOneProfile.profileStats.level, countryTwoProfile.profileStats.level, 2500);
 
     const updatedProfileStats = {
-      ...winnerProfile.profileStats,
-      totalBattles: updateBattleStats(winnerProfile.profileStats.totalBattles, true),
-      consecutiveWins: updateConsecutiveWins(winnerProfile.profileStats.consecutiveWins, true),
-      highestEnemyLevelDefeated: updateHighestEnemyLevelDefeated(winnerProfile.profileStats.highestEnemyLevelDefeated, loserProfile.profileStats.level, true),
-      firstVictory: updateFirstwin(winnerProfile.profileStats.firstvictory, true)
+      ...countryOneProfile.profileStats,
+      totalBattles: updateBattleStats(countryOneProfile.profileStats.totalBattles, true),
+      total_wins: updateTotalWins(countryOneProfile.profileStats.total_wins, true),
+      highestEnemyLevelDefeated: updateHighestEnemyLevelDefeated(countryOneProfile.profileStats.highestEnemyLevelDefeated, countryTwoProfile.profileStats.level, true),
+      firstVictory: updateFirstwin(countryOneProfile.profileStats.firstvictory, true)
+    };
+
+    matchStats = {
+      battleTotal: updatedProfileStats.totalBattles,
+      totalWins: updatedProfileStats.total_wins
     };
 
     let updatedWinnerProfile = {
-      ...winnerProfile,
+      ...countryOneProfile,
       profileStats: updatedProfileStats
     };
 
     const updatedWinnerProfileWithXp = updateProfileXpAndLevel(updatedWinnerProfile, xpGain);
     const updatedWinnerProfileWithBudget = updateProfileBudget(updatedWinnerProfileWithXp, budgetIncrease);
 
-    const winnerRemainingUnits = warResult.isCountryOneWinner ? warResult.countryOneRemainingUnits : warResult.countryTwoRemainingUnits;
-    const loserRemainingUnits = warResult.isCountryOneWinner ? warResult.countryTwoRemainingUnits : warResult.countryOneRemainingUnits;
+    updatedWinnerProfileWithBudget.units = warResult.countryOneRemainingUnits;
 
-    updatedWinnerProfileWithBudget.units = winnerRemainingUnits;
+    updatedCountryOneProfile = updatedWinnerProfileWithBudget;
+    updatedCountryTwoProfile.units = warResult.countryTwoRemainingUnits;
 
-    const updatedLoserProfile = { ...loserProfile, units: loserRemainingUnits };
+    rewards = {
+      xpGain,
+      budgetIncrease,
+    };
 
-    if (warResult.isCountryOneWinner) {
-      if (countryTwoProfile.type === 'AI') {
-        // Only update the winner profile if the loser is AI
-        updatedCountryOneProfile = updatedWinnerProfileWithBudget;
-      } else {
-        // Update both profiles if the loser is not AI
-        updatedCountryOneProfile = updatedWinnerProfileWithBudget;
-        updatedCountryTwoProfile = updatedLoserProfile;
-      }
-    } else {
-      if (countryOneProfile.type === 'AI') {
-        // Only update the winner profile if the loser is AI
-        updatedCountryTwoProfile = updatedWinnerProfileWithBudget;
-      } else {
-        // Update both profiles if the loser is not AI
-        updatedCountryTwoProfile = updatedWinnerProfileWithBudget;
-        updatedCountryOneProfile = updatedLoserProfile;
-      }
-    }
+  } else {
+    // Handle CountryOne loses case
+    const loserXpGain = 5;  // Example xp gain for losing
+    const loserBudget = 100;
+    const updatedProfileStats = {
+      ...countryOneProfile.profileStats,
+      totalBattles: updateBattleStats(countryOneProfile.profileStats.totalBattles, true),
+      total_wins: updateTotalWins(countryOneProfile.profileStats.total_wins, true),
+    };
 
-    console.log('Country One Power', warResult.countryOneTotalPower);
-    console.log('Country Two Power', warResult.countryTwoTotalPower);
-    console.log(`Winner: ${warResult.isCountryOneWinner ? 'Country 1' : 'Country 2'}`);
-    console.log(`Loser: ${warResult.isCountryOneWinner ? 'Country 2' : 'Country 1'}`);
-    console.log("Winner Rewards:", { xpGain, budgetIncrease, updatedProfileStats });
-    console.log("After Match Winner Profile:", updatedWinnerProfileWithBudget);
-    console.log("After Match Loser Profile:", updatedLoserProfile);
+    matchStats = {
+      battleTotal: updatedProfileStats.totalBattles,
+      totalWins: updatedProfileStats.total_wins
+    };
+
+    updatedCountryOneProfile = {
+      ...countryOneProfile,
+      profileStats: updatedProfileStats,
+      units: warResult.countryOneRemainingUnits
+    };
+
+    updatedCountryTwoProfile.units = warResult.countryTwoRemainingUnits;
+
+    loserRewards = {
+      xpGain: loserXpGain,
+      budgetIncrease: loserBudget
+    };
   }
 
   checkAndAwardAchievements(updatedCountryOneProfile, updatedCountryTwoProfile.profileStats.level);
   checkAndAwardAchievements(updatedCountryTwoProfile, updatedCountryOneProfile.profileStats.level);
 
-  console.log(updatedCountryOneProfile)
-  return { updatedCountryOneProfile, updatedCountryTwoProfile };
+  return {
+    updatedCountryOneProfile,
+    updatedCountryTwoProfile,
+    matchStats,
+    rewards,
+    loserRewards,
+    isCountryOneWinner: warResult.isCountryOneWinner
+  };
 };
 
 module.exports = {
