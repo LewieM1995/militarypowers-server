@@ -37,14 +37,12 @@ const runSimulationForClient = async (req, res) => {
     const updatedCountryOneProfile = result.updatedCountryOneProfile;
 
     const isCountryOneWinner = result.isCountryOneWinner;
-    console.log(isCountryOneWinner)
+    const isCountryTwoWinner = result.isCountryTwoWinner;
     const isStalemate = result.isStalemate;
     const rewards = result.rewards;
     const loserRewards = result.loserRewards;
     const matchStats = result.matchStats;
-
-    console.log(matchStats);
-    console.log(rewards);
+    const message = result.message;
 
     const updateCountryQuery = `
       UPDATE country
@@ -60,7 +58,7 @@ const runSimulationForClient = async (req, res) => {
 
     const updateProfileStatsQuery = `
       UPDATE profile_stats
-      SET level = ?, xp = ?, nextLevelXp = ?, totalBattles = ?, total_wins = ?, highestEnemyLevelDefeated = ?, firstVictory = ?
+      SET level = ?, xp = ?, nextLevelXp = ?, totalBattles = ?, total_wins = ?, total_losses = ?, highestEnemyLevelDefeated = ?, firstVictory = ?
       WHERE country_id = ?;
     `;
 
@@ -73,26 +71,30 @@ const runSimulationForClient = async (req, res) => {
     try {
       await connection.beginTransaction();
 
+      // Check for NaN values before updating the database
+      const {
+        infantry, navy, airForce, technology, logistics, intelligence
+      } = updatedCountryOneProfile.units;
+
+      if ([infantry, navy, airForce, technology, logistics, intelligence].some(isNaN)) {
+        throw new Error('Invalid unit values: NaN detected');
+      }
+
+      const {
+        level, xp, nextLevelXp, totalBattles, total_wins, total_losses, highestEnemyLevelDefeated, firstVictory
+      } = updatedCountryOneProfile.profileStats;
+
+      if ([level, xp, nextLevelXp, totalBattles, total_wins, total_losses, highestEnemyLevelDefeated].some(isNaN)) {
+        throw new Error('Invalid profile stats values: NaN detected');
+      }
+
       // Update the user's profile (CountryOne) in the database
       await connection.query(updateCountryQuery, [updatedCountryOneProfile.budget, countryId]);
       await connection.query(updateUnitsQuery, [
-        updatedCountryOneProfile.units.infantry,
-        updatedCountryOneProfile.units.navy,
-        updatedCountryOneProfile.units.airForce,
-        updatedCountryOneProfile.units.technology,
-        updatedCountryOneProfile.units.logistics,
-        updatedCountryOneProfile.units.intelligence,
-        countryId
+        infantry, navy, airForce, technology, logistics, intelligence, countryId
       ]);
       await connection.query(updateProfileStatsQuery, [
-        updatedCountryOneProfile.profileStats.level,
-        updatedCountryOneProfile.profileStats.xp,
-        updatedCountryOneProfile.profileStats.nextLevelXp,
-        updatedCountryOneProfile.profileStats.totalBattles,
-        updatedCountryOneProfile.profileStats.total_wins,
-        updatedCountryOneProfile.profileStats.highestEnemyLevelDefeated,
-        updatedCountryOneProfile.profileStats.firstVictory ? 1 : 0,
-        countryId
+        level, xp, nextLevelXp, totalBattles, total_wins, total_losses, highestEnemyLevelDefeated, firstVictory ? 1 : 0, countryId
       ]);
 
       for (const achievement of updatedCountryOneProfile.profileStats.achievements) {
@@ -105,22 +107,31 @@ const runSimulationForClient = async (req, res) => {
       if (isStalemate) {
         res.json({
           success: true,
-          message: 'Profile updated successfully in the database. The battle ended in a stalemate.',
+          message: 'The battle ended in a stalemate.',
           data: updatedCountryOneProfile,
-          matchStats: matchStats
+          matchStats: matchStats,
+          rewards: loserRewards
         });
       } else if (isCountryOneWinner) {
         res.json({
           success: true,
-          message: 'Profile updated successfully in the database. You won the battle!',
+          message: 'You won the battle!',
           data: updatedCountryOneProfile,
           rewards: rewards,
           matchStats: matchStats
         });
+      } else if (message) {
+          res.json({
+            success: true,
+            message: message,
+            data: updatedCountryOneProfile,
+            rewards: rewards,
+            matchStats: matchStats
+          });
       } else {
         res.json({
           success: true,
-          message: 'Profile updated successfully in the database. You lost the battle.',
+          message: 'You lost the battle',
           data: updatedCountryOneProfile,
           rewards: loserRewards,
           matchStats: matchStats

@@ -27,6 +27,7 @@ const getUser = async (req, res) => {
         ps.nextLevelXp,
         ps.totalBattles,
         ps.total_wins,
+        ps.total_losses,
         ps.highestEnemyLevelDefeated,
         ps.firstVictory,
         a.id AS achievementId,
@@ -83,6 +84,7 @@ const getUser = async (req, res) => {
           nextLevelXp: user.nextLevelXp,
           totalBattles: user.totalBattles,
           total_wins: user.total_wins,
+          total_losses: user.total_losses,
           highestEnemyLevelDefeated: user.highestEnemyLevelDefeated,
           firstVictory: user.firstVictory === 1,
           achievements,  // Add achievements here

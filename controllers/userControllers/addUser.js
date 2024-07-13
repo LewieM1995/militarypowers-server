@@ -44,7 +44,7 @@ const addUser = async (req, res) => {
 
       // Insert into profile_stats table
       await connection.query(
-        'INSERT INTO profile_stats (country_id, level, xp, nextLevelXp, totalBattles, consecutiveWins, highestEnemyLevelDefeated, firstVictory) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO profile_stats (country_id, level, xp, nextLevelXp, totalBattles, total_wins, total_losses, highestEnemyLevelDefeated, firstVictory) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         [
           countryId,
           initialProfile.profileStats.level,
@@ -52,6 +52,7 @@ const addUser = async (req, res) => {
           initialProfile.profileStats.nextLevelXp,
           initialProfile.profileStats.totalBattles,
           initialProfile.profileStats.total_wins,
+          initialProfile.profileStats.total_losses,
           initialProfile.profileStats.highestEnemyLevelDefeated,
           initialProfile.profileStats.firstVictory ? 1 : 0,
         ]

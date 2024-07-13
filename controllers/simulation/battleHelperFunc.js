@@ -65,11 +65,11 @@ const calculateMilitaryPower = (country, terrain) => {
     const modifiers = terrainModifiers[terrain];
 
     return (
-      country.units.infantry * 1 * modifiers.infantry +
-      country.units.navy * 1 * modifiers.navy +
+      country.units.infantry * 0.5 * modifiers.infantry +
+      country.units.navy * 0.85 * modifiers.navy +
       country.units.airForce * 1 * modifiers.airForce +
       country.units.technology * 1 * modifiers.technology +
-      country.units.logistics * 1 * modifiers.logistics +
+      country.units.logistics * 0.5 * modifiers.logistics +
       country.units.intelligence * 2 * modifiers.intelligence
     );
   } catch (error) {
@@ -77,22 +77,43 @@ const calculateMilitaryPower = (country, terrain) => {
   }
 };
 
-const calculateRemainingUnits = (initialUnits, lossPercentage, isWinner) => {
+const calculateRemainingUnits = (initialUnits, lossPercentage, isWinner, isStalemate = false) => {
   try {
-    //console.log('calculateRemainingUnits called with initialUnits:', initialUnits, 'lossPercentage:', lossPercentage, 'isWinner:', isWinner);
     const remainingUnits = {};
-    const lossFactor = isWinner ? 1 - lossPercentage / 10 : 1 - lossPercentage;
-    console.log("this is loss factor", lossFactor);
+
+    // Adjust lossFactor based on whether it's a stalemate or a win/loss scenario
+    const lossFactor = isStalemate ? 0.95 : (isWinner ? 1 - lossPercentage / 10 : 1 - lossPercentage);
+    
 
     for (const unit in initialUnits) {
       if (initialUnits.hasOwnProperty(unit)) {
-        remainingUnits[unit] = Math.floor(initialUnits[unit] * lossFactor);
+        const initialCount = initialUnits[unit];
+
+        if (isNaN(initialCount) || initialCount < 0) {
+          console.warn(`Invalid initial unit count for ${unit}:`, initialCount);
+          remainingUnits[unit] = 0; // Default to 0 if the initial unit count is invalid
+        } else {
+          const remainingCount = Math.floor(initialCount * lossFactor);
+          if (isNaN(remainingCount) || remainingCount < 0) {
+            console.warn(`Invalid remaining unit count for ${unit}:`, remainingCount);
+            remainingUnits[unit] = 0; // Default to 0 if the remaining unit count is invalid
+          } else {
+            remainingUnits[unit] = remainingCount;
+          }
+        }
       }
     }
-
     return remainingUnits;
   } catch (error) {
     console.error('Error in calculateRemainingUnits:', error);
+    return {
+      infantry: 0,
+      navy: 0,
+      airForce: 0,
+      technology: 0,
+      logistics: 0,
+      intelligence: 0,
+    };
   }
 };
 
@@ -113,17 +134,33 @@ const calculateUnitsLost = (initialUnits, remainingUnits) => {
 
 const applyStalemateLossRate = (units) => {
   try {
-    //console.log('applyStalemateLossRate called with units:', units);
     const stalemateLossRate = 0.05;
     const lossUnits = {};
+
     for (const unit in units) {
       if (units.hasOwnProperty(unit)) {
-        lossUnits[unit] = Math.floor(units[unit] * stalemateLossRate);
+        const unitCount = units[unit];
+
+        // Ensure the unit count is a valid number
+        if (isNaN(unitCount) || unitCount < 0) {
+          console.warn(`Invalid unit count for ${unit}:`, unitCount);
+          lossUnits[unit] = 0; // Default to 0 if the unit count is invalid
+        } else {
+          lossUnits[unit] = Math.floor(unitCount * stalemateLossRate);
+        }
       }
     }
     return lossUnits;
   } catch (error) {
     console.error('Error in applyStalemateLossRate:', error);
+    return {
+      infantry: 0,
+      navy: 0,
+      airForce: 0,
+      technology: 0,
+      logistics: 0,
+      intelligence: 0,
+    };
   }
 };
 
@@ -202,7 +239,7 @@ const updateProfileXpAndLevel = (profile, xpGain) => {
     while (updatedXp >= updatedNextLevelXp) {
       updatedXp -= updatedNextLevelXp;
       updatedLevel += 1;
-      updatedNextLevelXp *= 1.5; // Assuming the XP required for the next level doubles
+      updatedNextLevelXp *= 1.3;
     }
 
     const updatedProfileStats = {
@@ -238,12 +275,21 @@ const updateTotalWins = (winnerStats, isWinner) => {
     //console.log('updateConsecutiveWins called with winnerStats:', winnerStats, 'isWinner:', isWinner);
     if (isWinner){
       return winnerStats + 1;
-    } else {
-      winnerStats = 0;
-    }
+    } 
     return winnerStats;
   } catch (error) {
     console.error('Error in updateTotalWins:', error);
+  }
+};
+
+const updateTotalLosses = (winnerStats, isWinner) => {
+  try {
+    if (!isWinner){
+      return winnerStats + 1;
+    } 
+    return winnerStats;
+  } catch (error) {
+    console.error('Error in updateTotalLosses:', error);
   }
 };
 
@@ -341,6 +387,7 @@ module.exports = {
   updateProfileXpAndLevel,
   updateBattleStats,
   updateTotalWins,
+  updateTotalLosses,
   updateHighestEnemyLevelDefeated,
   updateFirstwin,
   checkAndAwardAchievements
