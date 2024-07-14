@@ -71,9 +71,7 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
   };
 };
 
-const runSimulation = (countryOneProfile, countryTwoProfile) => {
-
-  
+const runSimulation = (countryOneProfile, countryTwoProfile) => { 
 
   if (!countryOneProfile || !countryOneProfile.units) {
     throw new Error('Country one profile or units are not properly defined');
@@ -156,6 +154,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     matchStats = {
       battleTotal: updatedProfileStats.totalBattles,
       totalWins: updatedProfileStats.total_wins,
+      total_losses: updatedProfileStats.total_losses
     };
 
     let updatedWinnerProfile = {

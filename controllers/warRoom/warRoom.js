@@ -8,7 +8,7 @@ const warRoom = async (req, res) => {
   }
 
   const minLevel = playerLevel - 3;
-  const maxLevel = playerLevel + 10;
+  const maxLevel = playerLevel + 5;
 
   try {
     const connection = await pool.getConnection();
