@@ -93,6 +93,7 @@ const getUser = async (req, res) => {
 
       // Construct the response data
       const responseData = {
+        name: user.name,
         userId: user.userId,
         email: user.email,
         countryId: user.countryId,

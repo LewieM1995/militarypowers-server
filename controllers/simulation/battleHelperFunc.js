@@ -181,10 +181,10 @@ const rewardWinner = (level, isWinner, enemyLevel) => {
     let xpGain;
     if (isWinner) {
       if (level > enemyLevel) {
-        xpGain = (level + enemyLevel) * 100; // Example calculation for XP gain
+        xpGain = (level + enemyLevel) * 200; // Example calculation for XP gain
         return xpGain;
       } else {
-        xpGain = (level + enemyLevel) * 2 * 100;
+        xpGain = (level + enemyLevel) * 2 * 160;
         return xpGain;
       }
     }

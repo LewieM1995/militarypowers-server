@@ -73,11 +73,13 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
 
 const runSimulation = (countryOneProfile, countryTwoProfile) => { 
 
-  if (!countryOneProfile || !countryOneProfile.units) {
+  if (!countryOneProfile?.units) {
     throw new Error('Country one profile or units are not properly defined');
   }
-
-  if (countryOneProfile.units.infantry === 0 && countryOneProfile.units.navy === 0 && countryOneProfile.units.airForce === 0 && countryOneProfile.units.technology === 0 && countryOneProfile.units.logistics === 0 && countryOneProfile.units.intelligence === 0) {
+  
+  const { infantry, navy, airForce, technology, logistics, intelligence } = countryOneProfile.units;
+  
+  if (![infantry, navy, airForce, technology, logistics, intelligence].some(unit => unit > 0)) {
     return {
       message: 'Not enough units in the army',
       updatedCountryOneProfile: countryOneProfile,
@@ -90,6 +92,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
       matchStats: null,
     };
   }
+  
 
   const terrain = getRandomTerrain();
   const warResult = simulateWar(countryOneProfile, countryTwoProfile, terrain);
@@ -131,6 +134,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     matchStats = {
       battleTotal: updatedProfileStats.totalBattles,
       totalWins: updatedProfileStats.total_wins,
+      total_losses: updatedProfileStats.total_losses
     };
 
     const updatedLoserProfile = updateProfileXpAndLevel(updatedCountryOneProfile, loserRewards.xpGain);
