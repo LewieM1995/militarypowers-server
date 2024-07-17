@@ -73,6 +73,9 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
 
 const runSimulation = (countryOneProfile, countryTwoProfile) => { 
 
+  const profileLevel = countryOneProfile.profileStats.level;
+  let message;
+
   if (!countryOneProfile?.units) {
     throw new Error('Country one profile or units are not properly defined');
   }
@@ -93,6 +96,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     };
   }
   
+  //next thing to do: Update getUser to fetch battle reports from, retrieve last 5??? create frontend output to display battle reports.
 
   const terrain = getRandomTerrain();
   const warResult = simulateWar(countryOneProfile, countryTwoProfile, terrain);
@@ -127,15 +131,18 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     };
 
     loserRewards = {
-      xpGain: 500,
-      budgetIncrease: 1000,
+      xpGain: profileLevel * 2 * 100,
+      budgetIncrease: 5000,
     };
 
     matchStats = {
       battleTotal: updatedProfileStats.totalBattles,
       totalWins: updatedProfileStats.total_wins,
-      total_losses: updatedProfileStats.total_losses
+      total_losses: updatedProfileStats.total_losses,
+      units_lost: warResult.countryOneUnitsLost
     };
+
+    message = "The battle ended in a stalemate."
 
     const updatedLoserProfile = updateProfileXpAndLevel(updatedCountryOneProfile, loserRewards.xpGain);
     updatedCountryOneProfile = updateProfileBudget(updatedLoserProfile, loserRewards.budgetIncrease);
@@ -158,7 +165,8 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     matchStats = {
       battleTotal: updatedProfileStats.totalBattles,
       totalWins: updatedProfileStats.total_wins,
-      total_losses: updatedProfileStats.total_losses
+      total_losses: updatedProfileStats.total_losses,
+      units_lost: warResult.countryOneUnitsLost
     };
 
     let updatedWinnerProfile = {
@@ -179,7 +187,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
       budgetIncrease,
     };
 
-    const loserXpGain = 500;
+    const loserXpGain = profileLevel * 2 * 100;
     const loserBudget = 5000;
 
     const updatedLoserProfileTwo = updateProfileXpAndLevel(updatedCountryTwoProfile, loserXpGain);
@@ -190,8 +198,11 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
       budgetIncrease: loserBudget
     };
 
+    message = "You won the battle!";
+    
+
   } else {
-    const loserXpGain = 500;
+    const loserXpGain = profileLevel * 2 * 100;
     const loserBudget = 5000;
 
     const updatedProfileStats = {
@@ -203,7 +214,8 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     matchStats = {
       battleTotal: updatedProfileStats.totalBattles,
       totalWins: updatedProfileStats.total_wins,
-      total_losses: updatedProfileStats.total_losses
+      total_losses: updatedProfileStats.total_losses,
+      units_lost: warResult.countryOneUnitsLost
     };
 
     updatedCountryOneProfile = {
@@ -249,6 +261,9 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
       xpGain: loserXpGain,
       budgetIncrease: loserBudget
     };
+
+    message = "You lost the battle";
+
   }
 
   checkAndAwardAchievements(updatedCountryOneProfile, updatedCountryTwoProfile.profileStats.level);
@@ -262,6 +277,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     loserRewards,
     isCountryOneWinner: warResult.isCountryOneWinner,
     isStalemate: warResult.isStalemate,
+    message
   };
 };
 

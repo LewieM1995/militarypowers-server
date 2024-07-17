@@ -1,12 +1,7 @@
 const pool = require("../../database");
+const generateBattleReport = require("./generateBattleReport");
 const { runSimulation } = require("./testlogic");
 require("dotenv").config();
-const OpenAI = require("openai");
-
-// Configure OpenAI API
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const runSimulationForClient = async (req, res) => {
   const { userId, email, countryId, name, profile, enemyProfile } = req.body;
@@ -39,7 +34,6 @@ const runSimulationForClient = async (req, res) => {
   };
 
   try {
-    // Run the simulation
     const result = runSimulation(userProfile.profile, enemyAIProfile);
 
     // Destructure result object
@@ -58,7 +52,7 @@ const runSimulationForClient = async (req, res) => {
     if (message === 'Not enough units in the army') {
       return res.json({
         success: true,
-        message: 'Not enough units in the army',
+        message: message,
         data: updatedCountryOneProfile,
         matchStats: matchStats,
         rewards: null,
@@ -90,6 +84,11 @@ const runSimulationForClient = async (req, res) => {
       VALUES (?, ?, ?);
     `;
 
+    const insertBattleReportQuery = `
+      INSERT INTO battle_reports (user_id, enemy_name, units_lost, message, xp_gain, budget_increase)
+      VALUES (?, ?, ?, ?, ?, ?);
+    `;
+
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
@@ -115,56 +114,16 @@ const runSimulationForClient = async (req, res) => {
         await connection.query(insertUserAchievementQuery, [userId, achievement.id, new Date()]);
       }
 
+      const unitsLostJson = JSON.stringify(matchStats.units_lost);
+
+      // Insert the battle report into the database
+      const battleXP = isCountryOneWinner ? rewards.xpGain : loserRewards.xpGain;
+      const battleBudget = isCountryOneWinner ? rewards.budgetIncrease : loserRewards.budgetIncrease;
+      await connection.query(insertBattleReportQuery, [userId, enemyAIProfile.name, unitsLostJson, message, battleXP, battleBudget]);
+
       await connection.commit();
 
-      // Function to delay execution
-      function delay(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
-      }
-
-      // Generate the battle report
-      const chatGPTPrompt = `
-        Generate a detailed battle report based on the following outcome:
-        - ${JSON.stringify(userProfile.name)}: ${JSON.stringify(userProfile.profile.units)}
-        - ${JSON.stringify(enemyAIProfile.name)}: ${JSON.stringify(enemyAIProfile.units)}
-        - Message: ${message}
-
-        Provide a compelling narrative of the battle including key events, strategies used, and the final outcome. 
-        Don't mention the budget. Never mention Profile levels.
-
-        Break the report down into the following sections:
-
-        1. **Introduction**
-          - Brief overview of the battle setup and the main competitors.
-          
-        2. **Unit Comparison**
-          - Compare the units of both sides (infantry, navy, air force, technology, logistics, intelligence).
-          - Compare units in a terse and concise manner, this part does not need to be narratively driven.
-
-        3. **Key Events**
-          - Highlight major events and turning points in the battle.
-
-        4. **Strategies Used**
-          - Discuss the strategies employed by both sides.
-
-        5. **Outcome**
-          - Summarize the final outcome of the battle.
-
-        Please ensure each section is clearly labeled and the content is concise.
-      `;
-
-      await delay(1000);
-
-      try {
-        const chatGPTResponse = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: chatGPTPrompt },
-          ],
-        });
-
-        const battleReport = chatGPTResponse.choices[0].message.content.trim();
+      const battleReport = await generateBattleReport(userProfile, enemyAIProfile, message);
 
         // Determine the response based on the outcome
         if (isStalemate) {
@@ -185,7 +144,7 @@ const runSimulationForClient = async (req, res) => {
             matchStats: matchStats,
             battleReport: battleReport,
           });
-        } else if (message) {
+        } else if (message === 'Not enough units in the army') {
           res.json({
             success: true,
             message: message,
@@ -204,15 +163,6 @@ const runSimulationForClient = async (req, res) => {
             battleReport: battleReport,
           });
         }
-      } catch (error) {
-        if (error.code === "insufficient_quota") {
-          console.error("Rate limit error:", error.message);
-          res.status(429).json({ error: "Rate limit exceeded. Please try again later." });
-        } else {
-          console.error("Error generating battle report:", error);
-          res.status(500).json({ error: "Internal Server Error" });
-        }
-      }
     } catch (error) {
       await connection.rollback();
       console.error("Error running simulation and updating database:", error);

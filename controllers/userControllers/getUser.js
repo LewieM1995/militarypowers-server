@@ -3,13 +3,20 @@ const { format } = require('date-fns');
 
 const getUser = async (req, res) => {
   try {
-    const { email } = req.params;  // Extract email from request parameters
+    const { email } = req.params;
 
     if (!email) {
       return res.status(400).json({ error: "email is required" });  // Validate email
     }
 
     const query = `
+      WITH recent_battle_reports AS (
+        SELECT *
+        FROM battle_reports
+        WHERE user_id = (SELECT id FROM user WHERE email = ?)
+        ORDER BY created_at DESC
+        LIMIT 5
+      )
       SELECT
         u.id AS userId,
         u.email AS email,
@@ -33,7 +40,13 @@ const getUser = async (req, res) => {
         a.id AS achievementId,
         a.name AS achievementName,
         a.description AS achievementDescription,
-        ua.achieved_at AS achievedAt  -- Fix the typo and ensure the correct table alias
+        ua.achieved_at AS achievedAt,
+        br.enemy_name as enemy_name,
+        br.units_lost as units_lost,
+        br.message as message,
+        br.xp_gain as xpGain,
+        br.budget_increase as budgetIncrease,
+        br.created_at as br_created_at
       FROM
         user u
         INNER JOIN country c ON u.id = c.user_id
@@ -41,19 +54,18 @@ const getUser = async (req, res) => {
         INNER JOIN profile_stats ps ON c.id = ps.country_id
         LEFT JOIN user_achievements ua ON u.id = ua.user_id
         LEFT JOIN achievements a ON ua.achievement_id = a.id
+        LEFT JOIN recent_battle_reports br ON u.id = br.user_id
       WHERE
         u.email = ?
     `;
 
-    const [results] = await pool.query(query, [email]);  // Pass the email as a parameter
+    const [results] = await pool.query(query, [email, email]);
 
     if (results.length > 0) {
-      // Extract user data
       const user = results[0];
 
-      // Collect achievements, ensuring to avoid duplicates
       const achievements = results
-        .filter(row => row.achievementId)  // Filter out rows without achievement data
+        .filter(row => row.achievementId)
         .map(row => ({
           id: row.achievementId,
           name: row.achievementName,
@@ -67,7 +79,17 @@ const getUser = async (req, res) => {
           return uniqueAchievements;
         }, []);
 
-      // Construct the profile object
+      const battleReports = results
+        .filter(row => row.br_created_at)
+        .map(row => ({
+          enemy_name: row.enemy_name,
+          units_lost: row.units_lost,
+          br_message: row.message,
+          br_xpGain: row.xpGain,
+          br_budgetInc: row.budgetIncrease,
+          br_created_at: format(new Date(row.br_created_at), 'MMMM d, yyyy HH:mm:ss')
+        })).slice(0, 5);
+
       const profile = {
         budget: user.budget,
         units: {
@@ -87,11 +109,11 @@ const getUser = async (req, res) => {
           total_losses: user.total_losses,
           highestEnemyLevelDefeated: user.highestEnemyLevelDefeated,
           firstVictory: user.firstVictory === 1,
-          achievements,  // Add achievements here
+          achievements,
         },
+        battleReports
       };
 
-      // Construct the response data
       const responseData = {
         name: user.name,
         userId: user.userId,
