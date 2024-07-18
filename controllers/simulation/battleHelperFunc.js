@@ -1,4 +1,4 @@
-const terrains = ["desert", "forest", "mountain", "plains", "urban", "sea"];
+ /* const terrains = ["desert", "forest", "mountain", "plains", "urban", "sea"];
 const getRandomTerrain = () => {
   try {
     //console.log('getRandomTerrain called');
@@ -6,35 +6,7 @@ const getRandomTerrain = () => {
   } catch (error) {
     console.error('Error in getRandomTerrain:', error);
   }
-};
-
-const units = {
-  Riflemen: 'Riflemen',
-  Sniper: 'Sniper',
-  Medic: 'Medic',
-  AntiTank: 'AntiTank',
-  MachineGunner: 'MachineGunner',
-  Battleship: 'Battleship',
-  Destroyer: 'Destroyer',
-  Submarine: 'Submarine',
-  Frigate: 'Frigate',
-  Cruiser: 'Cruiser',
-  FighterJet: 'FighterJet',
-  Drone: 'Drone',
-  AttackHelicopter: 'AttackHelicopter',
-  Bomber: 'Bomber',
-  SatelliteSystems: 'SatelliteSystems',
-  Robotics: 'Robotics',
-  Biotechnology: 'Biotechnology',
-  Nanotechnology: 'Nanotechnology',
-  FieldHospital: 'FieldHospital',
-  AerialSupplyDrop: 'AerialSupplyDrop',
-  EngineeringCorp: 'EngineeringCorp',
-  MedicalEvacVehicle: 'MedicalEvacVehicle',
-  HumanIntel: 'HumanIntel',
-  CyberIntel: 'CyberIntel',
-  DroneSurveillanceUnit: 'DroneSurveillanceUnit'
-};
+}; */
 
 const calculateMilitaryPower = (country, terrain) => {
   try {
@@ -207,23 +179,23 @@ const calculateMilitaryPower = (country, terrain) => {
 
     return (
       country.units.Riflemen * 0.5 * modifiers.Riflemen +
-      country.units.Sniper * 0.5 * modifiers.Sniper +
-      country.units.Medic * 0.5 * modifiers.Medic +
-      country.units.AntiTank * 0.5 * modifiers.AntiTank +
+      country.units.Sniper * 0.6 * modifiers.Sniper +
+      country.units.Medic * 0.7 * modifiers.Medic +
+      country.units.AntiTank * 0.55 * modifiers.AntiTank +
       country.units.MachineGunner * 0.5 * modifiers.MachineGunner +
-      country.units.Battleship * 0.85 * modifiers.Battleship +
-      country.units.Destroyer * 0.85 * modifiers.Destroyer +
-      country.units.Submarine * 0.85 * modifiers.Submarine +
-      country.units.Frigate * 0.85 * modifiers.Frigate +
-      country.units.Cruiser * 0.85 * modifiers.Cruiser +
-      country.units.FighterJet * 1 * modifiers.FighterJet +
-      country.units.Drone * 1 * modifiers.Drone +
-      country.units.AttackHelicopter * 1 * modifiers.AttackHelicopter +
-      country.units.Bomber * 1 * modifiers.Bomber +
-      country.units.SatelliteSystems * 1 * modifiers.SatelliteSystems +
-      country.units.Robotics * 1 * modifiers.Robotics +
-      country.units.Biotechnology * 1 * modifiers.Biotechnology +
-      country.units.Nanotechnology * 1 * modifiers.Nanotechnology +
+      country.units.Battleship * 1.2 * modifiers.Battleship +
+      country.units.Destroyer * 1.2 * modifiers.Destroyer +
+      country.units.Submarine * 1.2 * modifiers.Submarine +
+      country.units.Frigate * 0.9 * modifiers.Frigate +
+      country.units.Cruiser * 1 * modifiers.Cruiser +
+      country.units.FighterJet * 1.2 * modifiers.FighterJet +
+      country.units.Drone * 1.4 * modifiers.Drone +
+      country.units.AttackHelicopter * 1.4 * modifiers.AttackHelicopter +
+      country.units.Bomber * 1.6 * modifiers.Bomber +
+      country.units.SatelliteSystems * 1.1 * modifiers.SatelliteSystems +
+      country.units.Robotics * 1.7 * modifiers.Robotics +
+      country.units.Biotechnology * 1.9 * modifiers.Biotechnology +
+      country.units.Nanotechnology * 4 * modifiers.Nanotechnology +
       country.units.FieldHospital * 0.5 * modifiers.FieldHospital +
       country.units.AerialSupplyDrop * 0.5 * modifiers.AerialSupplyDrop +
       country.units.EngineeringCorp * 0.5 * modifiers.EngineeringCorp +
@@ -378,10 +350,10 @@ const rewardWinner = (level, isWinner, enemyLevel) => {
     let xpGain;
     if (isWinner) {
       if (level > enemyLevel) {
-        xpGain = (level + enemyLevel) * 200; // Example calculation for XP gain
+        xpGain = (level + enemyLevel) * 600;
         return xpGain;
       } else {
-        xpGain = (level + enemyLevel) * 2 * 160;
+        xpGain = (level + enemyLevel) * 4 * 600;
         return xpGain;
       }
     }
@@ -399,7 +371,7 @@ const calculateBudgetIncrease = (winnerLevel, enemyLevel, initValue) => {
     if (winnerLevel > enemyLevel) {
       levelFactor = (winnerLevel + enemyLevel) / 2; // Example calculation based on the winner's level
     } else {
-      levelFactor = ((winnerLevel + enemyLevel) * 2) / 2.5; // Example calculation based on the winner's and enemy's levels
+      levelFactor = ((winnerLevel + enemyLevel) * 3.5) / 2; // Example calculation based on the winner's and enemy's levels
     }
 
     const budgetIncrease = initValue * levelFactor;
@@ -436,7 +408,7 @@ const updateProfileXpAndLevel = (profile, xpGain) => {
     while (updatedXp >= updatedNextLevelXp) {
       updatedXp -= updatedNextLevelXp;
       updatedLevel += 1;
-      updatedNextLevelXp *= 1.3;
+      updatedNextLevelXp *= 1.1;
     }
 
     const updatedProfileStats = {
@@ -572,7 +544,6 @@ const achievementCriteria = [
 ];
 
 module.exports = {
-  getRandomTerrain,
   calculateMilitaryPower,
   calculateRemainingUnits,
   calculateUnitsLost,

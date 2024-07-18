@@ -1,5 +1,5 @@
 const initialProfile = {
-  budget: 50000,
+  budget: 1000000,
   units: {
     Riflemen: 100,
     Sniper: 5,

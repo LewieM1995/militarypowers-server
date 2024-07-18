@@ -1,5 +1,4 @@
 const {
-  getRandomTerrain,
   calculateMilitaryPower,
   calculateRemainingUnits,
   calculateUnitsLost,
@@ -71,7 +70,7 @@ const simulateWar = (countryOne, countryTwo, terrain) => {
   };
 };
 
-const runSimulation = (countryOneProfile, countryTwoProfile) => { 
+const runSimulation = (countryOneProfile, countryTwoProfile, terrain) => { 
 
   const profileLevel = countryOneProfile.profileStats.level;
   let message;
@@ -122,7 +121,6 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     };
   }
 
-  const terrain = getRandomTerrain();
   const warResult = simulateWar(countryOneProfile, countryTwoProfile, terrain);
 
   let updatedCountryOneProfile = countryOneProfile;
@@ -156,7 +154,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
 
     loserRewards = {
       xpGain: profileLevel * 2 * 100,
-      budgetIncrease: 5000,
+      budgetIncrease: 10000,
     };
 
     matchStats = {
@@ -176,7 +174,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
 
   } else if (warResult.isCountryOneWinner) {
     const xpGain = rewardWinner(countryOneProfile.profileStats.level, true, countryTwoProfile.profileStats.level);
-    const budgetIncrease = calculateBudgetIncrease(countryOneProfile.profileStats.level, countryTwoProfile.profileStats.level, 2500);
+    const budgetIncrease = calculateBudgetIncrease(countryOneProfile.profileStats.level, countryTwoProfile.profileStats.level, 3000);
 
     const updatedProfileStats = {
       ...countryOneProfile.profileStats,
@@ -212,7 +210,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     };
 
     const loserXpGain = profileLevel * 2 * 100;
-    const loserBudget = 5000;
+    const loserBudget = 10000;
 
     const updatedLoserProfileTwo = updateProfileXpAndLevel(updatedCountryTwoProfile, loserXpGain);
     updatedCountryTwoProfile = updateProfileBudget(updatedLoserProfileTwo, loserBudget);
@@ -227,7 +225,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
 
   } else {
     const loserXpGain = profileLevel * 2 * 100;
-    const loserBudget = 5000;
+    const loserBudget = 10000;
 
     const updatedProfileStats = {
       ...countryOneProfile.profileStats,
@@ -254,7 +252,7 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     updatedCountryOneProfile = updateProfileBudget(updatedLoserProfile, loserBudget);
 
     const xpGain = rewardWinner(countryTwoProfile.profileStats.level, true, countryOneProfile.profileStats.level);
-    const budgetIncrease = calculateBudgetIncrease(countryTwoProfile.profileStats.level, countryOneProfile.profileStats.level, 2500);
+    const budgetIncrease = calculateBudgetIncrease(countryTwoProfile.profileStats.level, countryOneProfile.profileStats.level, 4000);
 
     const updatedProfileStatsTwo = {
       ...countryTwoProfile.profileStats,

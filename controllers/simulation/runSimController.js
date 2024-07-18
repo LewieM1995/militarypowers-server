@@ -20,6 +20,7 @@ const runSimulationForClient = async (req, res) => {
     id: enemyProfile.id,
     name: enemyProfile.name,
     level: enemyProfile.level,
+    terrain: enemyProfile.terrain,
     units: {
       Riflemen: enemyProfile.Riflemen,
       Sniper: enemyProfile.Sniper,
@@ -53,7 +54,7 @@ const runSimulationForClient = async (req, res) => {
   };
 
   try {
-    const result = runSimulation(userProfile.profile, enemyAIProfile);
+    const result = runSimulation(userProfile.profile, enemyAIProfile, enemyAIProfile.terrain);
 
     // Destructure result object
     const {
