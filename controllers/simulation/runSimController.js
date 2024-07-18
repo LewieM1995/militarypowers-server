@@ -21,12 +21,31 @@ const runSimulationForClient = async (req, res) => {
     name: enemyProfile.name,
     level: enemyProfile.level,
     units: {
-      infantry: enemyProfile.infantry,
-      navy: enemyProfile.navy,
-      airForce: enemyProfile.airForce,
-      technology: enemyProfile.technology,
-      logistics: enemyProfile.logistics,
-      intelligence: enemyProfile.intelligence,
+      Riflemen: enemyProfile.Riflemen,
+      Sniper: enemyProfile.Sniper,
+      Medic: enemyProfile.Medic,
+      AntiTank: enemyProfile.AntiTank,
+      MachineGunner: enemyProfile.MachineGunner,
+      Battleship: enemyProfile.Battleship,
+      Destroyer: enemyProfile.Destroyer,
+      Submarine: enemyProfile.Submarine,
+      Frigate: enemyProfile.Frigate,
+      Cruiser: enemyProfile.Cruiser,
+      FighterJet: enemyProfile.FighterJet,
+      Drone: enemyProfile.Drone,
+      AttackHelicopter: enemyProfile.AttackHelicopter,
+      Bomber: enemyProfile.Bomber,
+      SatelliteSystems: enemyProfile.SatelliteSystems,
+      Robotics: enemyProfile.Robotics,
+      Biotechnology: enemyProfile.Biotechnology,
+      Nanotechnology: enemyProfile.Nanotechnology,
+      FieldHospital: enemyProfile.FieldHospital,
+      AerialSupplyDrop: enemyProfile.AerialSupplyDrop,
+      EngineeringCorp: enemyProfile.EngineeringCorp,
+      MedicalEvacVehicle: enemyProfile.MedicalEvacVehicle,
+      HumanIntel: enemyProfile.HumanIntel,
+      CyberIntel: enemyProfile.CyberIntel,
+      DroneSurveillanceUnit: enemyProfile.DroneSurveillanceUnit,
     },
     profileStats: {
       level: enemyProfile.level,
@@ -46,6 +65,8 @@ const runSimulationForClient = async (req, res) => {
       loserRewards,
       matchStats,
       message,
+      countryOneTotalPower,
+      countryTwoTotalPower
     } = result;
 
     // Handle the case where there are not enough units in the army
@@ -69,7 +90,12 @@ const runSimulationForClient = async (req, res) => {
 
     const updateUnitsQuery = `
       UPDATE units
-      SET infantry = ?, navy = ?, airForce = ?, technology = ?, logistics = ?, intelligence = ?
+      SET Riflemen = ?, Sniper = ?, Medic = ?, AntiTank = ?, MachineGunner = ?, 
+          Battleship = ?, Destroyer = ?, Submarine = ?, Frigate = ?, Cruiser = ?, 
+          FighterJet = ?, Drone = ?, AttackHelicopter = ?, Bomber = ?, 
+          SatelliteSystems = ?, Robotics = ?, Biotechnology = ?, Nanotechnology = ?, 
+          FieldHospital = ?, AerialSupplyDrop = ?, EngineeringCorp = ?, MedicalEvacVehicle = ?, 
+          HumanIntel = ?, CyberIntel = ?, DroneSurveillanceUnit = ?
       WHERE country_id = ?;
     `;
 
@@ -94,10 +120,10 @@ const runSimulationForClient = async (req, res) => {
       await connection.beginTransaction();
 
       // Check for NaN values before updating the database
-      const { infantry, navy, airForce, technology, logistics, intelligence } = updatedCountryOneProfile.units;
+      const { Riflemen, Sniper, Medic, AntiTank, MachineGunner, Battleship, Destroyer, Submarine, Frigate, Cruiser, FighterJet, Drone, AttackHelicopter, Bomber, SatelliteSystems, Robotics, Biotechnology, Nanotechnology, FieldHospital, AerialSupplyDrop, EngineeringCorp, MedicalEvacVehicle, HumanIntel, CyberIntel, DroneSurveillanceUnit } = updatedCountryOneProfile.units;
       const { level, xp, nextLevelXp, totalBattles, total_wins, total_losses, highestEnemyLevelDefeated, firstVictory } = updatedCountryOneProfile.profileStats;
 
-      if ([infantry, navy, airForce, technology, logistics, intelligence].some(isNaN)) {
+      if ([Riflemen, Sniper, Medic, AntiTank, MachineGunner, Battleship, Destroyer, Submarine, Frigate, Cruiser, FighterJet, Drone, AttackHelicopter, Bomber, SatelliteSystems, Robotics, Biotechnology, Nanotechnology, FieldHospital, AerialSupplyDrop, EngineeringCorp, MedicalEvacVehicle, HumanIntel, CyberIntel, DroneSurveillanceUnit].some(isNaN)) {
         throw new Error("Invalid unit values: NaN detected");
       }
 
@@ -107,7 +133,7 @@ const runSimulationForClient = async (req, res) => {
 
       // Update the user's profile (CountryOne) in the database
       await connection.query(updateCountryQuery, [updatedCountryOneProfile.budget, countryId]);
-      await connection.query(updateUnitsQuery, [infantry, navy, airForce, technology, logistics, intelligence, countryId]);
+      await connection.query(updateUnitsQuery, [Riflemen, Sniper, Medic, AntiTank, MachineGunner, Battleship, Destroyer, Submarine, Frigate, Cruiser, FighterJet, Drone, AttackHelicopter, Bomber, SatelliteSystems, Robotics, Biotechnology, Nanotechnology, FieldHospital, AerialSupplyDrop, EngineeringCorp, MedicalEvacVehicle, HumanIntel, CyberIntel, DroneSurveillanceUnit, countryId]);
       await connection.query(updateProfileStatsQuery, [level, xp, nextLevelXp, totalBattles, total_wins, total_losses, highestEnemyLevelDefeated, firstVictory ? 1 : 0, countryId]);
 
       for (const achievement of updatedCountryOneProfile.profileStats.achievements) {
@@ -123,46 +149,46 @@ const runSimulationForClient = async (req, res) => {
 
       await connection.commit();
 
-      const battleReport = await generateBattleReport(userProfile, enemyAIProfile, message);
+      const battleReport = await generateBattleReport(userProfile, enemyAIProfile, message, countryOneTotalPower, countryTwoTotalPower);
 
-        // Determine the response based on the outcome
-        if (isStalemate) {
-          res.json({
-            success: true,
-            message: "The battle ended in a stalemate.",
-            data: updatedCountryOneProfile,
-            matchStats: matchStats,
-            rewards: loserRewards,
-            battleReport: battleReport,
-          });
-        } else if (isCountryOneWinner) {
-          res.json({
-            success: true,
-            message: "You won the battle!",
-            data: updatedCountryOneProfile,
-            rewards: rewards,
-            matchStats: matchStats,
-            battleReport: battleReport,
-          });
-        } else if (message === 'Not enough units in the army') {
-          res.json({
-            success: true,
-            message: message,
-            data: updatedCountryOneProfile,
-            rewards: rewards,
-            matchStats: matchStats,
-            battleReport: battleReport,
-          });
-        } else {
-          res.json({
-            success: true,
-            message: "You lost the battle",
-            data: updatedCountryOneProfile,
-            rewards: loserRewards,
-            matchStats: matchStats,
-            battleReport: battleReport,
-          });
-        }
+      // Determine the response based on the outcome
+      if (isStalemate) {
+        res.json({
+          success: true,
+          message: "The battle ended in a stalemate.",
+          data: updatedCountryOneProfile,
+          matchStats: matchStats,
+          rewards: loserRewards,
+          battleReport: battleReport,
+        });
+      } else if (isCountryOneWinner) {
+        res.json({
+          success: true,
+          message: "You won the battle!",
+          data: updatedCountryOneProfile,
+          rewards: rewards,
+          matchStats: matchStats,
+          battleReport: battleReport,
+        });
+      } else if (message === 'Not enough units in the army') {
+        res.json({
+          success: true,
+          message: message,
+          data: updatedCountryOneProfile,
+          rewards: rewards,
+          matchStats: matchStats,
+          battleReport: battleReport,
+        });
+      } else {
+        res.json({
+          success: true,
+          message: "You lost the battle",
+          data: updatedCountryOneProfile,
+          rewards: loserRewards,
+          matchStats: matchStats,
+          battleReport: battleReport,
+        });
+      }
     } catch (error) {
       await connection.rollback();
       console.error("Error running simulation and updating database:", error);

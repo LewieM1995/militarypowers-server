@@ -10,14 +10,21 @@ const updateUnits = async (req, res) => {
 
       // Update units in the units table
       const [unitsResult] = await connection.query(
-        'UPDATE units SET infantry = ?, navy = ?, airForce = ?, technology = ?, logistics = ?, intelligence = ? WHERE country_id = ?',
+        `UPDATE units 
+         SET Riflemen = ?, Sniper = ?, Medic = ?, AntiTank = ?, MachineGunner = ?, 
+             Battleship = ?, Destroyer = ?, Submarine = ?, Frigate = ?, Cruiser = ?, 
+             FighterJet = ?, Drone = ?, AttackHelicopter = ?, Bomber = ?, 
+             SatelliteSystems = ?, Robotics = ?, Biotechnology = ?, Nanotechnology = ?, 
+             FieldHospital = ?, AerialSupplyDrop = ?, EngineeringCorp = ?, MedicalEvacVehicle = ?, 
+             HumanIntel = ?, CyberIntel = ?, DroneSurveillanceUnit = ? 
+         WHERE country_id = ?`,
         [
-          units.infantry,
-          units.navy,
-          units.airForce,
-          units.technology,
-          units.logistics,
-          units.intelligence,
+          units.Riflemen, units.Sniper, units.Medic, units.AntiTank, units.MachineGunner,
+          units.Battleship, units.Destroyer, units.Submarine, units.Frigate, units.Cruiser,
+          units.FighterJet, units.Drone, units.AttackHelicopter, units.Bomber,
+          units.SatelliteSystems, units.Robotics, units.Biotechnology, units.Nanotechnology,
+          units.FieldHospital, units.AerialSupplyDrop, units.EngineeringCorp, units.MedicalEvacVehicle,
+          units.HumanIntel, units.CyberIntel, units.DroneSurveillanceUnit,
           countryId,
         ]
       );
@@ -34,7 +41,12 @@ const updateUnits = async (req, res) => {
       // Fetch the updated data
       const [updatedUserData] = await connection.query(
         `SELECT 
-          u.infantry, u.navy, u.airForce, u.technology, u.logistics, u.intelligence, 
+          u.Riflemen, u.Sniper, u.Medic, u.AntiTank, u.MachineGunner,
+          u.Battleship, u.Destroyer, u.Submarine, u.Frigate, u.Cruiser,
+          u.FighterJet, u.Drone, u.AttackHelicopter, u.Bomber,
+          u.SatelliteSystems, u.Robotics, u.Biotechnology, u.Nanotechnology,
+          u.FieldHospital, u.AerialSupplyDrop, u.EngineeringCorp, u.MedicalEvacVehicle,
+          u.HumanIntel, u.CyberIntel, u.DroneSurveillanceUnit, 
           c.budget 
          FROM units u 
          JOIN country c ON u.country_id = c.id 

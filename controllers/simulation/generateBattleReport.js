@@ -4,12 +4,12 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function generateBattleReport(userProfile, enemyAIProfile, message) {
+async function generateBattleReport(userProfile, enemyAIProfile, message, countryOneTotalPower, countryTwoTotalPower) {
   const chatGPTPrompt = `
-    Generate a story style battle report based on the following outcome:
-    - User's country name: ${JSON.stringify(userProfile.name)}.
-    - ${JSON.stringify(userProfile.profile.units)} vs ${JSON.stringify(enemyAIProfile.units)}.
-    - Enemy coutry name: ${JSON.stringify(enemyAIProfile.name)}: 
+    Generate a story based on the following outcome:
+    ${JSON.stringify(userProfile.name)} vs ${JSON.stringify(enemyAIProfile.name)}(DON'T ADD QUOTES TO THE NAMES!)
+    ${JSON.stringify(userProfile.profile.units)} vs ${JSON.stringify(enemyAIProfile.units)}
+    ${countryOneTotalPower} vs ${countryTwoTotalPower} (Don't mention directy how much "POWER" each team has, just use it to determine the severity of the win or loss)
     - ${message}
   `;
 

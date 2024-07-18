@@ -8,69 +8,229 @@ const getRandomTerrain = () => {
   }
 };
 
+const units = {
+  Riflemen: 'Riflemen',
+  Sniper: 'Sniper',
+  Medic: 'Medic',
+  AntiTank: 'AntiTank',
+  MachineGunner: 'MachineGunner',
+  Battleship: 'Battleship',
+  Destroyer: 'Destroyer',
+  Submarine: 'Submarine',
+  Frigate: 'Frigate',
+  Cruiser: 'Cruiser',
+  FighterJet: 'FighterJet',
+  Drone: 'Drone',
+  AttackHelicopter: 'AttackHelicopter',
+  Bomber: 'Bomber',
+  SatelliteSystems: 'SatelliteSystems',
+  Robotics: 'Robotics',
+  Biotechnology: 'Biotechnology',
+  Nanotechnology: 'Nanotechnology',
+  FieldHospital: 'FieldHospital',
+  AerialSupplyDrop: 'AerialSupplyDrop',
+  EngineeringCorp: 'EngineeringCorp',
+  MedicalEvacVehicle: 'MedicalEvacVehicle',
+  HumanIntel: 'HumanIntel',
+  CyberIntel: 'CyberIntel',
+  DroneSurveillanceUnit: 'DroneSurveillanceUnit'
+};
+
 const calculateMilitaryPower = (country, terrain) => {
   try {
-    //console.log('calculateMilitaryPower called with country:', country, 'terrain:', terrain);
     const terrainModifiers = {
       desert: {
-        infantry: 1.0,
-        navy: 0.7,
-        airForce: 1.5,
-        technology: 1.5,
-        logistics: 1.6,
-        intelligence: 1.2,
+        Riflemen: 1.0,
+        Sniper: 1.0,
+        Medic: 1.0,
+        AntiTank: 1.0,
+        MachineGunner: 1.0,
+        Battleship: 0.7,
+        Destroyer: 0.7,
+        Submarine: 0.7,
+        Frigate: 0.7,
+        Cruiser: 0.7,
+        FighterJet: 1.5,
+        Drone: 1.5,
+        AttackHelicopter: 1.5,
+        Bomber: 1.5,
+        SatelliteSystems: 1.5,
+        Robotics: 1.5,
+        Biotechnology: 1.5,
+        Nanotechnology: 1.5,
+        FieldHospital: 1.6,
+        AerialSupplyDrop: 1.6,
+        EngineeringCorp: 1.6,
+        MedicalEvacVehicle: 1.6,
+        HumanIntel: 1.2,
+        CyberIntel: 1.2,
+        DroneSurveillanceUnit: 1.2
       },
       forest: {
-        infantry: 1.6,
-        navy: 0.7,
-        airForce: 1,
-        technology: 1.5,
-        logistics: 1.1,
-        intelligence: 1.7,
+        Riflemen: 1.6,
+        Sniper: 1.6,
+        Medic: 1.6,
+        AntiTank: 1.6,
+        MachineGunner: 1.6,
+        Battleship: 0.7,
+        Destroyer: 0.7,
+        Submarine: 0.7,
+        Frigate: 0.7,
+        Cruiser: 0.7,
+        FighterJet: 1,
+        Drone: 1,
+        AttackHelicopter: 1,
+        Bomber: 1,
+        SatelliteSystems: 1.5,
+        Robotics: 1.5,
+        Biotechnology: 1.5,
+        Nanotechnology: 1.5,
+        FieldHospital: 1.1,
+        AerialSupplyDrop: 1.1,
+        EngineeringCorp: 1.1,
+        MedicalEvacVehicle: 1.1,
+        HumanIntel: 1.7,
+        CyberIntel: 1.7,
+        DroneSurveillanceUnit: 1.7
       },
       mountain: {
-        infantry: 1.6,
-        navy: 0.6,
-        airForce: 1.4,
-        technology: 1.5,
-        logistics: 1.2,
-        intelligence: 1.4,
+        Riflemen: 1.6,
+        Sniper: 1.6,
+        Medic: 1.6,
+        AntiTank: 1.6,
+        MachineGunner: 1.6,
+        Battleship: 0.6,
+        Destroyer: 0.6,
+        Submarine: 0.6,
+        Frigate: 0.6,
+        Cruiser: 0.6,
+        FighterJet: 1.4,
+        Drone: 1.4,
+        AttackHelicopter: 1.4,
+        Bomber: 1.4,
+        SatelliteSystems: 1.5,
+        Robotics: 1.5,
+        Biotechnology: 1.5,
+        Nanotechnology: 1.5,
+        FieldHospital: 1.2,
+        AerialSupplyDrop: 1.2,
+        EngineeringCorp: 1.2,
+        MedicalEvacVehicle: 1.2,
+        HumanIntel: 1.4,
+        CyberIntel: 1.4,
+        DroneSurveillanceUnit: 1.4
       },
       plains: {
-        infantry: 1.2,
-        navy: 0.9,
-        airForce: 1.1,
-        technology: 1.5,
-        logistics: 1.0,
-        intelligence: 1.0,
+        Riflemen: 1.2,
+        Sniper: 1.2,
+        Medic: 1.2,
+        AntiTank: 1.2,
+        MachineGunner: 1.2,
+        Battleship: 0.9,
+        Destroyer: 0.9,
+        Submarine: 0.9,
+        Frigate: 0.9,
+        Cruiser: 0.9,
+        FighterJet: 1.1,
+        Drone: 1.1,
+        AttackHelicopter: 1.1,
+        Bomber: 1.1,
+        SatelliteSystems: 1.5,
+        Robotics: 1.5,
+        Biotechnology: 1.5,
+        Nanotechnology: 1.5,
+        FieldHospital: 1.0,
+        AerialSupplyDrop: 1.0,
+        EngineeringCorp: 1.0,
+        MedicalEvacVehicle: 1.0,
+        HumanIntel: 1.0,
+        CyberIntel: 1.0,
+        DroneSurveillanceUnit: 1.0
       },
       urban: {
-        infantry: 1.0,
-        navy: 0.7,
-        airForce: 1.0,
-        technology: 1.5,
-        logistics: 1.4,
-        intelligence: 1.7,
+        Riflemen: 1.0,
+        Sniper: 1.0,
+        Medic: 1.0,
+        AntiTank: 1.0,
+        MachineGunner: 1.0,
+        Battleship: 0.7,
+        Destroyer: 0.7,
+        Submarine: 0.7,
+        Frigate: 0.7,
+        Cruiser: 0.7,
+        FighterJet: 1.0,
+        Drone: 1.0,
+        AttackHelicopter: 1.0,
+        Bomber: 1.0,
+        SatelliteSystems: 1.5,
+        Robotics: 1.5,
+        Biotechnology: 1.5,
+        Nanotechnology: 1.5,
+        FieldHospital: 1.4,
+        AerialSupplyDrop: 1.4,
+        EngineeringCorp: 1.4,
+        MedicalEvacVehicle: 1.4,
+        HumanIntel: 1.7,
+        CyberIntel: 1.7,
+        DroneSurveillanceUnit: 1.7
       },
       sea: {
-        infantry: 0.8,
-        navy: 1.9,
-        airForce: 1.7,
-        technology: 1.5,
-        logistics: 1.0,
-        intelligence: 2,
+        Riflemen: 0.8,
+        Sniper: 0.8,
+        Medic: 0.8,
+        AntiTank: 0.8,
+        MachineGunner: 0.8,
+        Battleship: 1.9,
+        Destroyer: 1.9,
+        Submarine: 1.9,
+        Frigate: 1.9,
+        Cruiser: 1.9,
+        FighterJet: 1.7,
+        Drone: 1.7,
+        AttackHelicopter: 1.7,
+        Bomber: 1.7,
+        SatelliteSystems: 1.5,
+        Robotics: 1.5,
+        Biotechnology: 1.5,
+        Nanotechnology: 1.5,
+        FieldHospital: 1.0,
+        AerialSupplyDrop: 1.0,
+        EngineeringCorp: 1.0,
+        MedicalEvacVehicle: 1.0,
+        HumanIntel: 2.0,
+        CyberIntel: 2.0,
+        DroneSurveillanceUnit: 2.0
       },
     };
 
     const modifiers = terrainModifiers[terrain];
 
     return (
-      country.units.infantry * 0.5 * modifiers.infantry +
-      country.units.navy * 0.85 * modifiers.navy +
-      country.units.airForce * 1 * modifiers.airForce +
-      country.units.technology * 1 * modifiers.technology +
-      country.units.logistics * 0.5 * modifiers.logistics +
-      country.units.intelligence * 2 * modifiers.intelligence
+      country.units.Riflemen * 0.5 * modifiers.Riflemen +
+      country.units.Sniper * 0.5 * modifiers.Sniper +
+      country.units.Medic * 0.5 * modifiers.Medic +
+      country.units.AntiTank * 0.5 * modifiers.AntiTank +
+      country.units.MachineGunner * 0.5 * modifiers.MachineGunner +
+      country.units.Battleship * 0.85 * modifiers.Battleship +
+      country.units.Destroyer * 0.85 * modifiers.Destroyer +
+      country.units.Submarine * 0.85 * modifiers.Submarine +
+      country.units.Frigate * 0.85 * modifiers.Frigate +
+      country.units.Cruiser * 0.85 * modifiers.Cruiser +
+      country.units.FighterJet * 1 * modifiers.FighterJet +
+      country.units.Drone * 1 * modifiers.Drone +
+      country.units.AttackHelicopter * 1 * modifiers.AttackHelicopter +
+      country.units.Bomber * 1 * modifiers.Bomber +
+      country.units.SatelliteSystems * 1 * modifiers.SatelliteSystems +
+      country.units.Robotics * 1 * modifiers.Robotics +
+      country.units.Biotechnology * 1 * modifiers.Biotechnology +
+      country.units.Nanotechnology * 1 * modifiers.Nanotechnology +
+      country.units.FieldHospital * 0.5 * modifiers.FieldHospital +
+      country.units.AerialSupplyDrop * 0.5 * modifiers.AerialSupplyDrop +
+      country.units.EngineeringCorp * 0.5 * modifiers.EngineeringCorp +
+      country.units.MedicalEvacVehicle * 0.5 * modifiers.MedicalEvacVehicle +
+      country.units.HumanIntel * 2 * modifiers.HumanIntel +
+      country.units.CyberIntel * 2 * modifiers.CyberIntel +
+      country.units.DroneSurveillanceUnit * 2 * modifiers.DroneSurveillanceUnit
     );
   } catch (error) {
     console.error('Error in calculateMilitaryPower:', error);
@@ -84,7 +244,6 @@ const calculateRemainingUnits = (initialUnits, lossPercentage, isWinner, isStale
     // Adjust lossFactor based on whether it's a stalemate or a win/loss scenario
     const lossFactor = isStalemate ? 0.95 : (isWinner ? 1 - lossPercentage / 10 : 1 - lossPercentage);
     
-
     for (const unit in initialUnits) {
       if (initialUnits.hasOwnProperty(unit)) {
         const initialCount = initialUnits[unit];
@@ -107,12 +266,31 @@ const calculateRemainingUnits = (initialUnits, lossPercentage, isWinner, isStale
   } catch (error) {
     console.error('Error in calculateRemainingUnits:', error);
     return {
-      infantry: 0,
-      navy: 0,
-      airForce: 0,
-      technology: 0,
-      logistics: 0,
-      intelligence: 0,
+      Riflemen: 0,
+      Sniper: 0,
+      Medic: 0,
+      AntiTank: 0,
+      MachineGunner: 0,
+      Battleship: 0,
+      Destroyer: 0,
+      Submarine: 0,
+      Frigate: 0,
+      Cruiser: 0,
+      FighterJet: 0,
+      Drone: 0,
+      AttackHelicopter: 0,
+      Bomber: 0,
+      SatelliteSystems: 0,
+      Robotics: 0,
+      Biotechnology: 0,
+      Nanotechnology: 0,
+      FieldHospital: 0,
+      AerialSupplyDrop: 0,
+      EngineeringCorp: 0,
+      MedicalEvacVehicle: 0,
+      HumanIntel: 0,
+      CyberIntel: 0,
+      DroneSurveillanceUnit: 0
     };
   }
 };
@@ -154,12 +332,31 @@ const applyStalemateLossRate = (units) => {
   } catch (error) {
     console.error('Error in applyStalemateLossRate:', error);
     return {
-      infantry: 0,
-      navy: 0,
-      airForce: 0,
-      technology: 0,
-      logistics: 0,
-      intelligence: 0,
+      Riflemen: 0,
+      Sniper: 0,
+      Medic: 0,
+      AntiTank: 0,
+      MachineGunner: 0,
+      Battleship: 0,
+      Destroyer: 0,
+      Submarine: 0,
+      Frigate: 0,
+      Cruiser: 0,
+      FighterJet: 0,
+      Drone: 0,
+      AttackHelicopter: 0,
+      Bomber: 0,
+      SatelliteSystems: 0,
+      Robotics: 0,
+      Biotechnology: 0,
+      Nanotechnology: 0,
+      FieldHospital: 0,
+      AerialSupplyDrop: 0,
+      EngineeringCorp: 0,
+      MedicalEvacVehicle: 0,
+      HumanIntel: 0,
+      CyberIntel: 0,
+      DroneSurveillanceUnit: 0
     };
   }
 };

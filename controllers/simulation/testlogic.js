@@ -80,9 +80,35 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     throw new Error('Country one profile or units are not properly defined');
   }
   
-  const { infantry, navy, airForce, technology, logistics, intelligence } = countryOneProfile.units;
+  const {
+    Riflemen,
+    Sniper,
+    Medic,
+    AntiTank,
+    MachineGunner,
+    Battleship,
+    Destroyer,
+    Submarine,
+    Frigate,
+    Cruiser,
+    FighterJet,
+    Drone,
+    AttackHelicopter,
+    Bomber,
+    SatelliteSystems,
+    Robotics,
+    Biotechnology,
+    Nanotechnology,
+    FieldHospital,
+    AerialSupplyDrop,
+    EngineeringCorp,
+    MedicalEvacVehicle,
+    HumanIntel,
+    CyberIntel,
+    DroneSurveillanceUnit,
+  } = countryOneProfile.units;
   
-  if (![infantry, navy, airForce, technology, logistics, intelligence].some(unit => unit > 0)) {
+  if (![Riflemen, Sniper, Medic, AntiTank, MachineGunner, Battleship, Destroyer, Submarine, Frigate, Cruiser, FighterJet, Drone, AttackHelicopter, Bomber, SatelliteSystems, Robotics, Biotechnology, Nanotechnology, FieldHospital, AerialSupplyDrop, EngineeringCorp, MedicalEvacVehicle, HumanIntel, CyberIntel, DroneSurveillanceUnit].some(unit => unit > 0)) {
     return {
       message: 'Not enough units in the army',
       updatedCountryOneProfile: countryOneProfile,
@@ -95,8 +121,6 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
       matchStats: null,
     };
   }
-  
-  //next thing to do: Update getUser to fetch battle reports from, retrieve last 5??? create frontend output to display battle reports.
 
   const terrain = getRandomTerrain();
   const warResult = simulateWar(countryOneProfile, countryTwoProfile, terrain);
@@ -277,7 +301,9 @@ const runSimulation = (countryOneProfile, countryTwoProfile) => {
     loserRewards,
     isCountryOneWinner: warResult.isCountryOneWinner,
     isStalemate: warResult.isStalemate,
-    message
+    message,
+    countryOneTotalPower: warResult.countryOneTotalPower,
+    countryTwoTotalPower: warResult.countryTwoTotalPower,
   };
 };
 

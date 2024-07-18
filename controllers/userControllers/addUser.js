@@ -17,7 +17,7 @@ const addUser = async (req, res) => {
       // Insert into user table
       const [userResults] = await connection.query(
         'INSERT INTO user (email, password) VALUES (?, ?)',
-        [ email, hashedPassword]
+        [email, hashedPassword]
       );
       const userId = userResults.insertId;
 
@@ -30,7 +30,7 @@ const addUser = async (req, res) => {
 
       // Insert into units table
       await connection.query(
-        'INSERT INTO units (country_id, infantry, navy, airForce, technology, logistics, intelligence) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO units (country_id, infantry, navy, airForce, technology, logistics, intelligence, Riflemen, Sniper, Medic, AntiTank, MachineGunner, Battleship, Destroyer, Submarine, Frigate, Cruiser, FighterJet, Drone, AttackHelicopter, Bomber, SatelliteSystems, Robotics, Biotechnology, Nanotechnology, FieldHospital, AerialSupplyDrop, EngineeringCorp, MedicalEvacVehicle, HumanIntel, CyberIntel, DroneSurveillanceUnit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           countryId,
           initialProfile.units.infantry,
@@ -39,12 +39,37 @@ const addUser = async (req, res) => {
           initialProfile.units.technology,
           initialProfile.units.logistics,
           initialProfile.units.intelligence,
+          initialProfile.units.Riflemen,
+          initialProfile.units.Sniper,
+          initialProfile.units.Medic,
+          initialProfile.units.AntiTank,
+          initialProfile.units.MachineGunner,
+          initialProfile.units.Battleship,
+          initialProfile.units.Destroyer,
+          initialProfile.units.Submarine,
+          initialProfile.units.Frigate,
+          initialProfile.units.Cruiser,
+          initialProfile.units.FighterJet,
+          initialProfile.units.Drone,
+          initialProfile.units.AttackHelicopter,
+          initialProfile.units.Bomber,
+          initialProfile.units.SatelliteSystems,
+          initialProfile.units.Robotics,
+          initialProfile.units.Biotechnology,
+          initialProfile.units.Nanotechnology,
+          initialProfile.units.FieldHospital,
+          initialProfile.units.AerialSupplyDrop,
+          initialProfile.units.EngineeringCorp,
+          initialProfile.units.MedicalEvacVehicle,
+          initialProfile.units.HumanIntel,
+          initialProfile.units.CyberIntel,
+          initialProfile.units.DroneSurveillanceUnit,
         ]
       );
 
       // Insert into profile_stats table
       await connection.query(
-        'INSERT INTO profile_stats (country_id, level, xp, nextLevelXp, totalBattles, total_wins, total_losses, highestEnemyLevelDefeated, firstVictory) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO profile_stats (country_id, level, xp, nextLevelXp, totalBattles, total_wins, total_losses, highestEnemyLevelDefeated, firstVictory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           countryId,
           initialProfile.profileStats.level,
